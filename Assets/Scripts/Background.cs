@@ -15,8 +15,6 @@ public class Background : MonoBehaviour
 		if (pos > 1.0f)
 			pos -= 1.0f;
 
-			// Debug.Log("POS " + pos);
-
 		GetComponent<Renderer>().material.mainTextureOffset = new Vector2(pos, 0);
 	}
 

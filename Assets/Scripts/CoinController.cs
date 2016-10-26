@@ -31,7 +31,7 @@ public class CoinController : MonoBehaviour {
 		// fallY = fallY-=;
 		transform.position = new Vector3(1, posY-=GameManager.instance.coinFallSpeed/100, 0);
 		
-		if (Input.GetMouseButton(0)){
+		if (Input.GetMouseButton(0) || Input.touchCount > 0){
 			if (coinInfluence > 0.0f){ 
 				posY+=GameManager.instance.coinRiseSpeed/100;
 				coinInfluence -= GameManager.instance.influenceFallSpeed/100;
