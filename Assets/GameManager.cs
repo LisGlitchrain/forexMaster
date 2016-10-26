@@ -33,6 +33,7 @@ public class GameManager : MonoBehaviour {
 	int newQuantity;
 	bool positionOpen;
 	bool buying;
+	Vector3 panelY;
 
 	public Scrollbar influenceBar;
 	public Scrollbar depositBar;
@@ -45,6 +46,7 @@ public class GameManager : MonoBehaviour {
 	public Text supportPriceText;
 	public Text currentPriceText;
 	public RectTransform currentPricePanel;
+	public RectTransform openPositionPricePanel;
 
 
 	void Awake()
@@ -78,6 +80,9 @@ public class GameManager : MonoBehaviour {
 		depositText.text = depositRnd.ToString();
 
 		profitText.text = profit.ToString();
+		if (profit > 0) profitText.color = new Color(0, 182, 0);
+		else if (profit < 0) profitText.color = new Color(182, 0, 0);
+		else profitText.color = new Color(240, 240, 240);
 
 		if (positionOpen == true && buying == true)
 		{
@@ -97,7 +102,7 @@ public class GameManager : MonoBehaviour {
 
 		float oldDeposit = deposit;
 		deposit = Mathf.Round(oldDeposit*100)/100;
-		Vector3 panelY = Camera.main.WorldToScreenPoint(new Vector3 (-7.81f, coinPosY-3.05f, 0.0f));
+		panelY = Camera.main.WorldToScreenPoint(new Vector3 (-7.81f, coinPosY-3.05f, 0.0f));
 		currentPricePanel.localPosition = panelY;
 
 		if (deposit <= 0) GameOver();
@@ -131,11 +136,13 @@ public class GameManager : MonoBehaviour {
 		if (positionOpen == false) 
 		{
 			PositionManager(true, true, currentPrice, quantity);
+			openPositionPricePanel.localPosition = panelY;
 		}
 
 		else 
 		{
 			PositionManager(false, true, currentPrice, 0);
+			openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0);
 		}
 	}
 
@@ -145,11 +152,14 @@ public class GameManager : MonoBehaviour {
 		if (positionOpen == false) 
 		{
 			PositionManager(true, false, currentPrice, quantity);
+			openPositionPricePanel.localPosition = panelY;
+			Debug.Log(panelY);
 		}
 
 		else 
 		{
 			PositionManager(false, false, currentPrice, 0);
+			openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0);
 		}
 	}
 
