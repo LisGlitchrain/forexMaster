@@ -220,6 +220,9 @@ public class GameManager : MonoBehaviour {
 		comission = 0;
 		deposit = 0;
 		profit = 0;
+
+		// WaitForSeconds();
+		Application.LoadLevel(0);
 		// PositionManager(false, , 0, 0);
 	}
 }

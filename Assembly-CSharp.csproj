@@ -49,7 +49,9 @@
      <Compile Include="Assets\Scripts\Background.cs" />
      <Compile Include="Assets\Scripts\CameraControl.cs" />
      <Compile Include="Assets\Scripts\CoinController.cs" />
+     <Compile Include="Assets\Scripts\CrimeScene.cs" />
      <Compile Include="Assets\Scripts\Scroll.cs" />
+     <Compile Include="Assets\Scripts\Switcher.cs" />
      <Compile Include="Assets\Scripts\TrendLine.cs" />
  <Reference Include="UnityEngine.Advertisements">
  <HintPath>D:/Temp3/Transcend/Apps/Unity/Unity/Editor/Data/UnityExtensions/Unity/Advertisements/UnityEngine.Advertisements.dll</HintPath>
@@ -66,26 +68,26 @@
  <Reference Include="UnityEngine.Purchasing">
  <HintPath>D:/Temp3/Transcend/Apps/Unity/Unity/Editor/Data/UnityExtensions/Unity/UnityPurchasing/UnityEngine.Purchasing.dll</HintPath>
  </Reference>
- <Reference Include="Security">
- <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/Bin/Security.dll</HintPath>
- </Reference>
- <Reference Include="Apple">
- <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/Bin/Apple/Apple.dll</HintPath>
- </Reference>
  <Reference Include="Common">
  <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/Bin/Common.dll</HintPath>
  </Reference>
+ <Reference Include="Editor">
+ <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/Bin/Editor.dll</HintPath>
+ </Reference>
+ <Reference Include="Security">
+ <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/Bin/Security.dll</HintPath>
+ </Reference>
  <Reference Include="Stores">
  <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/Bin/Stores.dll</HintPath>
+ </Reference>
+ <Reference Include="Apple">
+ <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/Bin/Apple/Apple.dll</HintPath>
  </Reference>
  <Reference Include="Tizen">
  <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/Bin/Tizen/Tizen.dll</HintPath>
  </Reference>
  <Reference Include="winrt">
  <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/winrt/winrt.dll</HintPath>
- </Reference>
- <Reference Include="Editor">
- <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/Bin/Editor.dll</HintPath>
  </Reference>
   </ItemGroup>
   <ItemGroup>
