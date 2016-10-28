@@ -28,6 +28,13 @@ public class GameManager : MonoBehaviour {
 	public float spread;
 	public float comission;
 	public float influence;
+
+	public float topPositionProfit;
+	public float topSessionProfit;
+	public float overallCycles;
+	public float experience;
+	public float finalScore;
+
 	float stock;
 	float newSpread;
 	int newQuantity;
@@ -35,6 +42,9 @@ public class GameManager : MonoBehaviour {
 	bool buying;
 	Vector3 panelY;
 
+	public AudioClip[] audioClip;
+	AudioSource audioPlayer;
+	
 	public Scrollbar influenceBar;
 	public Scrollbar depositBar;
 	public Text depositText;
@@ -56,6 +66,8 @@ public class GameManager : MonoBehaviour {
 		// DontDestroyOnLoad(gameObject);
 		instance = this;
 		StartGame();
+		audioPlayer = GetComponent<AudioSource>();
+
 	}
 
 	void PreRun()
@@ -99,22 +111,35 @@ public class GameManager : MonoBehaviour {
 		}
 
 		else profit = 0;
-
+		
 		float oldDeposit = deposit;
 		deposit = Mathf.Round(oldDeposit*100)/100;
 		panelY = Camera.main.WorldToScreenPoint(new Vector3 (-7.81f, coinPosY-3.05f, 0.0f));
 		currentPricePanel.localPosition = panelY;
 
+		if (deposit < 20) SoundManager(4); 
 		if (deposit <= 0) GameOver();
 		depositBar.size = deposit/1000*5;
 
 		float influenceRnd = Mathf.Round((influence*100.0f)/100.0f);
 		influenceText.text = influenceRnd.ToString();
+
+
+		if (cycleCounter == 60)
+		{
+			ProgressStorage (1, 0);
+			cycleCounter = 0;
+		}
 	}
 	// public void initParameters (float gameSpeed, float influenceMax, float influenceRiseSpeed, float influenceFallSpeed, float coinFallSpeed, float coinRiseSpeed) 
 	// {
 
 	// }
+
+	public void OutOfBounds (bool resist, bool stay)
+	{
+		if (resist == true && stay == true) gameSpeed = 0;
+	}
 
 	public void SetQuantity (int setQuantity)
 	{
@@ -129,6 +154,7 @@ public class GameManager : MonoBehaviour {
 			}
 
 		quantityText.text = quantity.ToString();
+		SoundManager(3);
 	}
 
 	public void OpenBuyPosition ()
@@ -137,12 +163,15 @@ public class GameManager : MonoBehaviour {
 		{
 			PositionManager(true, true, currentPrice, quantity);
 			openPositionPricePanel.localPosition = panelY;
+			SoundManager(0);
 		}
 
 		else 
 		{
 			PositionManager(false, true, currentPrice, 0);
 			openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0);
+			if (profit > 0) SoundManager(1);
+			else  SoundManager(2);  
 		}
 	}
 
@@ -154,12 +183,15 @@ public class GameManager : MonoBehaviour {
 			PositionManager(true, false, currentPrice, quantity);
 			openPositionPricePanel.localPosition = panelY;
 			Debug.Log(panelY);
+			SoundManager(0);
 		}
 
 		else 
 		{
 			PositionManager(false, false, currentPrice, 0);
 			openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0);
+			if (profit > 0) SoundManager(1);
+			else  SoundManager(2); 
 		}
 	}
 
@@ -178,6 +210,7 @@ public class GameManager : MonoBehaviour {
 					openPositionNumText.text = openPrice.ToString();
 					positionOpen = true;
 				}
+				SoundManager(0);
 			}
 
 			if (open == false)
@@ -187,11 +220,18 @@ public class GameManager : MonoBehaviour {
 					deposit+=(profit+stock);
 					openPositionNumText.text = openPrice.ToString();
 					positionOpen = false;
+					ProgressStorage(0, profit);
 				}
 			}
 		}
 
 		else Debug.Log("No money, no honey!");
+	}
+
+	public void SoundManager(int clip)
+	{
+		audioPlayer.clip = audioClip[clip];
+		audioPlayer.Play();
 	}
 
 	public void SetPrices (float price){
@@ -214,13 +254,28 @@ public class GameManager : MonoBehaviour {
 		gameSpeed = gameSpd;	
 	}
 
+	void ProgressStorage (float cycles, float tPP)
+	{
+		overallCycles+=cycles;
+		if (tPP > topPositionProfit) topPositionProfit = tPP;
+		topSessionProfit+=tPP;
+	}
+
+	void ScoreCounter (float cycles, float tPP, float tSP)
+	{
+		finalScore = cycles+tPP+tSP;
+	}
+
 	void GameOver ()
 	{
+		SoundManager(5);
 		PauseGame(4, 0, 0, 1);
 		comission = 0;
 		deposit = 0;
 		profit = 0;
-
+		ScoreCounter (overallCycles, topPositionProfit, topSessionProfit);
+		experience += finalScore;
+		Debug.Log("OVERALL SCORE:  " + finalScore + "  || Cycles: " + overallCycles + " || TPP: " + topPositionProfit + " || TSP: " + topSessionProfit + "\n EXPERIENCE: " + experience);
 		// WaitForSeconds();
 		Application.LoadLevel(0);
 		// PositionManager(false, , 0, 0);

@@ -13,8 +13,10 @@ public class Background : MonoBehaviour
 
 		pos += (GameManager.instance.gameSpeed/1000)*16;
 		if (pos > 1.0f)
+		{
 			pos -= 1.0f;
-
+			GameManager.instance.cycleCounter += 1;
+		}
 		GetComponent<Renderer>().material.mainTextureOffset = new Vector2(pos, 0);
 	}
 

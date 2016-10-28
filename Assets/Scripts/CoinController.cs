@@ -49,8 +49,11 @@ public class CoinController : MonoBehaviour {
 		GameManager.instance.influence = coinInfluence;
 	}
 
-	void Influence() {
+	void OnCollisionEnter2d(Collision2D collider)
+	{
+		Debug.Log(collider.gameObject.tag);
 
+		// if (collision.gameObject.tag == "UpperCol") Debug.Log("HIT");
+	}
 
-		}
 	}
