@@ -47,6 +47,7 @@
   <ItemGroup>
      <Compile Include="Assets\CollisionTest.cs" />
      <Compile Include="Assets\GameManager.cs" />
+     <Compile Include="Assets\ObstacleManager.cs" />
      <Compile Include="Assets\Scripts\Background.cs" />
      <Compile Include="Assets\Scripts\CameraControl.cs" />
      <Compile Include="Assets\Scripts\CoinController.cs" />
@@ -54,6 +55,7 @@
      <Compile Include="Assets\Scripts\Scroll.cs" />
      <Compile Include="Assets\Scripts\Switcher.cs" />
      <Compile Include="Assets\Scripts\TrendLine.cs" />
+     <Compile Include="Assets\Tutorial.cs" />
  <Reference Include="UnityEngine.Advertisements">
  <HintPath>D:/Temp3/Transcend/Apps/Unity/Unity/Editor/Data/UnityExtensions/Unity/Advertisements/UnityEngine.Advertisements.dll</HintPath>
  </Reference>

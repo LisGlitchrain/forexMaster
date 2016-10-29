@@ -42,6 +42,7 @@ public class GameManager : MonoBehaviour {
 	float stock;
 	float newSpread;
 	int newQuantity;
+	bool gameOver;
 	bool positionOpen;
 	bool buying;
 	bool underSupport;
@@ -81,6 +82,7 @@ public class GameManager : MonoBehaviour {
 		instance = this;
 		StartGame();
 		audioPlayer = GetComponent<AudioSource>();
+		gameOver = false;
 
 	}
 
@@ -91,6 +93,7 @@ public class GameManager : MonoBehaviour {
 
 	public void StartGame()
 	{	
+		gameOver = false;
 		currentPrice = initialPrice;
 		SetPrices(initialPrice);
 		positionOpen = false;
@@ -132,8 +135,8 @@ public class GameManager : MonoBehaviour {
 		panelY = Camera.main.WorldToScreenPoint(new Vector3 (-7.81f, coinPosY-3.05f, 0.0f));
 		currentPricePanel.localPosition = panelY;
 
-		if (deposit < 20) SoundManager(4); 
-		if (deposit <= 0) GameOver();
+		// if (deposit < 20) SoundManager(4); 
+		if (deposit <= 0 && gameOver == false) GameOver();
 		depositBar.size = deposit/1000*5;
 
 		float influenceRnd = Mathf.Round((influence*100.0f)/100.0f);
@@ -204,7 +207,6 @@ public class GameManager : MonoBehaviour {
 
 				else quantity = 1;
 			}
-
 		quantityText.text = quantity.ToString();
 		SoundManager(3);
 	}
@@ -215,7 +217,6 @@ public class GameManager : MonoBehaviour {
 		{
 			PositionManager(true, true, currentPrice, quantity);
 			openPositionPricePanel.localPosition = panelY;
-			SoundManager(0);
 		}
 
 		else 
@@ -261,6 +262,7 @@ public class GameManager : MonoBehaviour {
 					deposit = oldDeposit - (openPrice*quantity);
 					openPositionNumText.text = openPrice.ToString();
 					positionOpen = true;
+					SoundManager(0);
 				}
 				SoundManager(0);
 			}
@@ -277,7 +279,11 @@ public class GameManager : MonoBehaviour {
 			}
 		}
 
-		else Debug.Log("No money, no honey!");
+		else 
+		{
+			Debug.Log("No money, no honey!");
+			openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0);
+		}
 	}
 
 	public void SoundManager(int clip)
@@ -320,6 +326,7 @@ public class GameManager : MonoBehaviour {
 
 	void GameOver ()
 	{	
+		gameOver = true;
 		gameOverPanel.gameObject.SetActive(true);
 		SoundManager(5);
 		PauseGame(4, 0, 0, 0);

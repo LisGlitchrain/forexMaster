@@ -6,7 +6,6 @@ public class TrendLine : MonoBehaviour {
 	public GameObject coin;
 	private float height;
 	private float currentHeight;
-	float gameSpeed;
 	ParticleSystem particle;
 
 	// Use this for initialization
@@ -23,12 +22,9 @@ public class TrendLine : MonoBehaviour {
 
 		transform.position = new Vector2(coin.transform.position.x,currentHeight);
 
-		gameSpeed = GameManager.instance.gameSpeed;
-		// gameObject.ParticleSystem.startSpeed = gameSpeed;
 		particle = GetComponent<ParticleSystem>() as ParticleSystem;
 
-		// gameSpeed = Background.current.speed;
-		particle.startSpeed = gameSpeed/1.8f; 
+		particle.startSpeed = GameManager.instance.gameSpeed/1.8f; 
 
 
 	}
