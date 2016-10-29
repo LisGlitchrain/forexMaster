@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections;
-using UnityEngine.UI;	
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;	
 
 public class GameManager : MonoBehaviour {
 
@@ -28,6 +29,9 @@ public class GameManager : MonoBehaviour {
 	public float spread;
 	public float comission;
 	public float influence;
+	public float Devaluation;
+	float coinFallSpeedStorage;
+	float coinRiseSpeedStorage;
 
 	public float topPositionProfit;
 	public float topSessionProfit;
@@ -40,6 +44,8 @@ public class GameManager : MonoBehaviour {
 	int newQuantity;
 	bool positionOpen;
 	bool buying;
+	bool underSupport;
+	bool aboveResistance;
 	Vector3 panelY;
 
 	public AudioClip[] audioClip;
@@ -57,6 +63,14 @@ public class GameManager : MonoBehaviour {
 	public Text currentPriceText;
 	public RectTransform currentPricePanel;
 	public RectTransform openPositionPricePanel;
+
+	public Scrollbar expBar;
+	public RectTransform gameOverPanel;
+	public RectTransform dialogPanel;
+	public Text tPPText;
+	public Text tSPText;
+	public Text sLenghtText;
+	public Text expText;
 
 
 	void Awake()
@@ -81,6 +95,7 @@ public class GameManager : MonoBehaviour {
 		SetPrices(initialPrice);
 		positionOpen = false;
 		quantity = 1;
+		gameOverPanel.gameObject.SetActive(false);
 	}
 
 	void Update() 
@@ -124,6 +139,15 @@ public class GameManager : MonoBehaviour {
 		float influenceRnd = Mathf.Round((influence*100.0f)/100.0f);
 		influenceText.text = influenceRnd.ToString();
 
+		if (underSupport == true)
+		{
+			deposit -= Mathf.Lerp(0, Devaluation, Time.deltaTime * 5.0f);
+		}
+
+		if (aboveResistance == true)
+		{
+			influenceMax -= Mathf.Lerp(0, Devaluation, Time.deltaTime * 5.0f);
+		}
 
 		if (cycleCounter == 60)
 		{
@@ -136,9 +160,37 @@ public class GameManager : MonoBehaviour {
 
 	// }
 
-	public void OutOfBounds (bool resist, bool stay)
+	public void OutOfBounds (bool support, bool stay)
 	{
-		if (resist == true && stay == true) gameSpeed = 0;
+
+		if (support == true && stay == true)
+		{	
+			coinFallSpeedStorage = coinFallSpeed;
+			coinFallSpeed = 0;
+			underSupport = true;
+		} 
+
+		if (support == false && stay == true) 
+		{
+			coinRiseSpeedStorage = coinRiseSpeed;
+			coinRiseSpeed = 0;
+			aboveResistance = true;
+		}
+		
+
+		if (support == true && stay == false) 
+		{
+			coinFallSpeed = coinFallSpeedStorage;
+			underSupport = false;
+		}
+
+		if (support == false && stay == false)
+		{
+			coinRiseSpeed = coinRiseSpeedStorage;
+			aboveResistance = false;
+		}
+
+		// else Debug.Log("RanAway");
 	}
 
 	public void SetQuantity (int setQuantity)
@@ -267,17 +319,28 @@ public class GameManager : MonoBehaviour {
 	}
 
 	void GameOver ()
-	{
+	{	
+		gameOverPanel.gameObject.SetActive(true);
 		SoundManager(5);
-		PauseGame(4, 0, 0, 1);
+		PauseGame(4, 0, 0, 0);
 		comission = 0;
 		deposit = 0;
 		profit = 0;
 		ScoreCounter (overallCycles, topPositionProfit, topSessionProfit);
-		experience += finalScore;
+		positionOpen = false;
+		// experience += finalScore;
+
+		tPPText.text = topPositionProfit.ToString();
+		tSPText.text = topSessionProfit.ToString();
+		sLenghtText.text = overallCycles.ToString();
+		expText.text = finalScore.ToString();
+		expBar.size = finalScore/100;
 		Debug.Log("OVERALL SCORE:  " + finalScore + "  || Cycles: " + overallCycles + " || TPP: " + topPositionProfit + " || TSP: " + topSessionProfit + "\n EXPERIENCE: " + experience);
-		// WaitForSeconds();
-		Application.LoadLevel(0);
-		// PositionManager(false, , 0, 0);
+	}
+
+	public void MainMenu ()
+	{
+		SceneManager.LoadScene (0);
+		// gameOverPanel.gameObject.SetActive(false);
 	}
 }

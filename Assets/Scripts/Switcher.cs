@@ -24,7 +24,7 @@ public class Switcher : MonoBehaviour {
 
 	public void StartNewGame () 
 	{
-		Application.LoadLevel(1);
+		SceneManager.LoadScene (1);
 		ClickSound();
 		
 	// SceneManager.LoadSceneAsync(1, LoadSceneMode.Single);	// SceneManager.SetActiveScene(1);
@@ -32,7 +32,7 @@ public class Switcher : MonoBehaviour {
 
 	public void CrimeScene () 
 	{
-		Application.LoadLevel(2);
+		SceneManager.LoadScene (2);
 		ClickSound();
 		
 	// SceneManager.LoadSceneAsync(1, LoadSceneMode.Single);	// SceneManager.SetActiveScene(1);

@@ -16,10 +16,7 @@ public class CoinController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		// oldRotZ = newRotZ
-		// newRotZ = -50 * Background.current.speed;
-		// rotZ = Mathf.Lerp(oldRotZ, newRotZ, 10.0f*Time.deltaTime);
-		// gameSpeed = GameManager.instance.gameSpeed;
+
 		GameManager.instance.influenceBar.size = coinInfluence/GameManager.instance.influenceMax;
 
 		if (coinInfluence < GameManager.instance.influenceMax) coinInfluence += GameManager.instance.influenceRiseSpeed/100;
@@ -41,19 +38,38 @@ public class CoinController : MonoBehaviour {
 			if (coinInfluence < 0.01f) Input.ResetInputAxes();
 
 		}
-            
-			// Background.current.speed = gameSpeed;
-			// Debug.Log(influence*100);
-			// Debug.Log("GAMESPEED: " + GameManager.instance.gameSpeed);
+
 		GameManager.instance.coinPosY = posY;
 		GameManager.instance.influence = coinInfluence;
 	}
 
-	void OnCollisionEnter2d(Collision2D collider)
+	void OnTriggerEnter2D(Collider2D coll)
 	{
-		Debug.Log(collider.gameObject.tag);
+		if (coll.gameObject.tag == "LowerCol")
+			{
+				GameManager.instance.OutOfBounds (true, true);
+			} 
 
-		// if (collision.gameObject.tag == "UpperCol") Debug.Log("HIT");
+
+		if (coll.gameObject.tag == "UpperCol")
+			{
+				GameManager.instance.OutOfBounds (false, true);
+			} 
 	}
+
+	void OnTriggerExit2D(Collider2D coll)
+	{
+		if (coll.gameObject.tag == "LowerCol")
+			{
+				GameManager.instance.OutOfBounds (true, false);
+			} 
+
+
+		if (coll.gameObject.tag == "UpperCol")
+			{
+				GameManager.instance.OutOfBounds (false, false);
+			} 
+	}
+
 
 	}

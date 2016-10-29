@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class CrimeScene : MonoBehaviour {
 
@@ -18,7 +19,7 @@ public class CrimeScene : MonoBehaviour {
 
 public void PullBack()
 {
-	Application.LoadLevel(0);
+	SceneManager.LoadScene (0);
 }
 
 }
