@@ -6,7 +6,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{96D576B9-5A27-0AFF-8FDB-C1802CDF6360}</ProjectGuid>
+    <ProjectGuid>{44815C00-7F51-0F8C-31F9-0F39FD17A437}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -72,30 +72,30 @@
  <HintPath>D:/Temp3/Transcend/Apps/Unity/Unity/Editor/Data/UnityExtensions/Unity/UnityPurchasing/UnityEngine.Purchasing.dll</HintPath>
  </Reference>
  <Reference Include="Common">
- <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/Bin/Common.dll</HintPath>
+ <HintPath>D:/Temp3/Transcend/Projects/forex-master-git/Assets/Plugins/UnityPurchasing/Bin/Common.dll</HintPath>
  </Reference>
  <Reference Include="Editor">
- <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/Bin/Editor.dll</HintPath>
+ <HintPath>D:/Temp3/Transcend/Projects/forex-master-git/Assets/Plugins/UnityPurchasing/Bin/Editor.dll</HintPath>
  </Reference>
  <Reference Include="Security">
- <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/Bin/Security.dll</HintPath>
+ <HintPath>D:/Temp3/Transcend/Projects/forex-master-git/Assets/Plugins/UnityPurchasing/Bin/Security.dll</HintPath>
  </Reference>
  <Reference Include="Stores">
- <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/Bin/Stores.dll</HintPath>
+ <HintPath>D:/Temp3/Transcend/Projects/forex-master-git/Assets/Plugins/UnityPurchasing/Bin/Stores.dll</HintPath>
  </Reference>
  <Reference Include="Apple">
- <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/Bin/Apple/Apple.dll</HintPath>
+ <HintPath>D:/Temp3/Transcend/Projects/forex-master-git/Assets/Plugins/UnityPurchasing/Bin/Apple/Apple.dll</HintPath>
  </Reference>
  <Reference Include="Tizen">
- <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/Bin/Tizen/Tizen.dll</HintPath>
+ <HintPath>D:/Temp3/Transcend/Projects/forex-master-git/Assets/Plugins/UnityPurchasing/Bin/Tizen/Tizen.dll</HintPath>
  </Reference>
  <Reference Include="winrt">
- <HintPath>D:/Temp3/Transcend/Projects/ForexMaster/ForexMaster/Assets/Plugins/UnityPurchasing/winrt/winrt.dll</HintPath>
+ <HintPath>D:/Temp3/Transcend/Projects/forex-master-git/Assets/Plugins/UnityPurchasing/winrt/winrt.dll</HintPath>
  </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
-      <Project>{CD4DE37C-21C7-E58B-ED4B-3288DA8EEC61}</Project>      <Name>Assembly-CSharp-firstpass</Name>    </ProjectReference>
+      <Project>{A3D36285-8616-7BFE-FA10-ABA4B11C17E7}</Project>      <Name>Assembly-CSharp-firstpass</Name>    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
