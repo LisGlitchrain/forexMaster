@@ -45,7 +45,7 @@ public class GameManager : MonoBehaviour {
 	int newQuantity;
 	int gameState;
 	// int tutorStep;
-	bool gameOver;
+	public bool gameOver;
 	bool positionOpen;
 	bool buying;
 	bool underSupport;
@@ -463,7 +463,7 @@ public class GameManager : MonoBehaviour {
 		SoundManager(5);
 		PauseGame(4, 0, 0, 0, 0);
 		comission = 0;
-		deposit = 0;
+		if (positionOpen == true) deposit = 0;
 		profit = 0;
 		ScoreCounter (overallCycles, topPositionProfit, topSessionProfit);
 		positionOpen = false;

@@ -23,8 +23,11 @@ public class ObstacleManager : MonoBehaviour {
 	void Update () {
 		// if (transform.position.x < generatorPoint.transform.position.x)
 		// {
+		if (GameManager.instance.gameOver == false)
+		{
 				int probability = Random.Range(0,50);
 				if (probability == 1) Spawn ();
+		}
 		// }
 	}
 

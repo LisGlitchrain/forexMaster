@@ -54,6 +54,7 @@ public class CoinController : MonoBehaviour {
 		if (coll.gameObject.tag == "UpperCol")
 			{
 				GameManager.instance.OutOfBounds (false, true);
+				Input.ResetInputAxes();
 			}
 
 		if (coll.gameObject.tag == "ObstacleCol")

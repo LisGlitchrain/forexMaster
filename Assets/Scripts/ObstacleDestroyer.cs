@@ -22,7 +22,7 @@ public class ObstacleDestroyer : MonoBehaviour {
 		else
 		{
 			candleX = transform.position.x;
-			candleX -= GameManager.instance.gameSpeed/100.0f;
+			candleX -= GameManager.instance.gameSpeed/112.5f;
 			// Debug.Log (candleX);
 			transform.position = new Vector3 (candleX, transform.position.y, transform.position.z);
 		}
