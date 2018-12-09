@@ -14,15 +14,15 @@ public class CameraControl : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		speed = GameManager.instance.gameSpeed;
-		if (speed > 14.0f && speed < 19.5f){
+		//speed = GameManager.instance.gameSpeed;
+		//if (speed > 14.0f && speed < 19.5f){ //Зачем это?
 
-			zoom = speed/4.6f;
-			orthoSize = Camera.main.orthographicSize;
-			Camera.main.orthographicSize =  Mathf.Lerp(orthoSize, zoom, 3.0f);
+		//	zoom = speed/4.6f;
+		//	orthoSize = Camera.main.orthographicSize;
+		//	Camera.main.orthographicSize =  Mathf.Lerp(orthoSize, zoom, 3.0f);
 
-			// Debug.Log(speed);
-			// Debug.Log(zoom);
-		}
+		//	// Debug.Log(speed);
+		//	// Debug.Log(zoom);
+		//}
 	}
 }

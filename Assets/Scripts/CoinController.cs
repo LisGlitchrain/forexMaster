@@ -2,7 +2,8 @@
 using System.Collections;
 using UnityEngine.UI;
 
-public class CoinController : MonoBehaviour {
+public class CoinController : MonoBehaviour
+{
 	float oldRotZ;
 	float newRotZ;
 	float rotZ;
@@ -10,32 +11,34 @@ public class CoinController : MonoBehaviour {
 	float coinInfluence;
 
 	// Use this for initialization
-	void Start () {
+	void Start ()
+    {
 		coinInfluence = GameManager.instance.influenceMax;
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update ()
+    {
 
 		GameManager.instance.influenceBar.size = coinInfluence/GameManager.instance.influenceMax;
 
-		if (coinInfluence < GameManager.instance.influenceMax) coinInfluence += GameManager.instance.influenceRiseSpeed/100;
-		rotZ = -1.0f * GameManager.instance.gameSpeed;
+		if (coinInfluence < GameManager.instance.influenceMax) coinInfluence += GameManager.instance.influenceRiseSpeed * Time.deltaTime; // / 100
+		rotZ = -100.0f * GameManager.instance.gameSpeed * Time.deltaTime;
 		transform.Rotate(0, 0, rotZ);
 
-		if(GameManager.instance.gameSpeed > 6.0f) GameManager.instance.gameSpeed -= 0.005f;
+		//if(GameManager.instance.gameSpeed > 6.0f) GameManager.instance.gameSpeed -= 0.005f; //Что это вообще такое?
 
 		// fallY = fallY-=;
-		transform.position = new Vector3(1, posY-=GameManager.instance.coinFallSpeed/100, 0);
-		
-		if (Input.GetMouseButton(0) || Input.touchCount > 0){
-			if (coinInfluence > 0.0f){ 
-				posY+=GameManager.instance.coinRiseSpeed/100;
-				coinInfluence -= GameManager.instance.influenceFallSpeed/100;
-				if(GameManager.instance.gameSpeed < 18.0f) GameManager.instance.gameSpeed += 0.01f;
-			}
+		transform.position = new Vector3(1, posY-=GameManager.instance.coinFallSpeed * Time.deltaTime, 0); // / 100
 
-			if (coinInfluence < 0.01f) Input.ResetInputAxes();
+        if (Input.GetMouseButton(0) || Input.touchCount > 0){
+			if (coinInfluence > 0.0f){ 
+				posY+=GameManager.instance.coinRiseSpeed * Time.deltaTime;// / 100
+                coinInfluence -= GameManager.instance.influenceFallSpeed* Time.deltaTime; // / 100
+                //if(GameManager.instance.gameSpeed < 18.0f) GameManager.instance.gameSpeed += 0.01f;
+            }
+
+			if (coinInfluence < 0.01f) Input.ResetInputAxes(); //Зачем?
 
 		}
 
@@ -78,4 +81,4 @@ public class CoinController : MonoBehaviour {
 	}
 
 
-	}
+}

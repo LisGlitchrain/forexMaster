@@ -3,8 +3,10 @@ using System.Collections;
 
 public class ObstacleDestroyer : MonoBehaviour {
 
-	public GameObject obstacleEater;
-	private float candleX = 0;
+	[SerializeField] GameObject obstacleEater;
+    [SerializeField] float speed;
+
+    private float candleX = 0;
 
 	// Use this for initialization
 	void Start () {
@@ -22,9 +24,9 @@ public class ObstacleDestroyer : MonoBehaviour {
 		else
 		{
 			candleX = transform.position.x;
-			candleX -= GameManager.instance.gameSpeed/112.5f;
-			// Debug.Log (candleX);
-			transform.position = new Vector3 (candleX, transform.position.y, transform.position.z);
+			candleX -= GameManager.instance.gameSpeed* Time.deltaTime * speed; // / 112.5f 
+            // Debug.Log (candleX);
+            transform.position = new Vector3 (candleX, transform.position.y, transform.position.z);
 		}
 	
 	}

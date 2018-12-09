@@ -10,93 +10,104 @@ public class GameManager : MonoBehaviour {
 
 	public bool firstRun;
 
-	public float gameSpeed;				//Общая скорость игры
-	public float influenceMax;			//Максимальное количество очков влияния
-	public float influenceRiseSpeed;	//Скорость восстановления очков влияния
-	public float influenceFallSpeed;	//Скорость растраты очков влияния
-	public float coinFallSpeed;			//Скорость падения монеты
-	public float coinRiseSpeed;			//Скорость подъёма монеты
-	public float deposit;				//Объём депозита (денег для торговли)
-	public float initialPrice;			//Начальная для игровой сессии цена инструмента (тут и далее: инструмент это пара товаров (Евро/Доллар, например))
-	public float currentPrice;			//Текущая цена инструмента
-	public float supportPrice;			//Значение цены уровня сопротивления (верхняя красная граница)
-	public float resistancePrice;		//Значение цены уровня поддержки (нижняя зелёная граница)
-	public float openPrice;				//Цена открытия позиции (начала сделки)
-	public float closePrice;			//Цена закрытия позиции (конца сделки)
-	public float profit;				//Доход от сделки
-	public int quantity;				//Количество товара торгуемого инстумента
-	public int cycleCounter;			//Глобальный счётчик длительности игровой сессии
-	public float coinPosY;				//Значение позиции монеты по Y (техническая переменная)
-	public float spread;				//Коэффициент разницы цен между ценой сопротивления и поддержки
-	public float comission;				//Размер комиссии, отчисляемой брокеру при открытии позиции
-	public float influence;				//Текущее количество очков влияния
-	public float Devaluation;			//Коэффициент обесценивания инструмента при падении ниже линии поддержки
-	float coinFallSpeedStorage;			
-	float coinRiseSpeedStorage;
+	public float gameSpeed;             //Общая скорость игры //public
+    public float influenceMax;			//Максимальное количество очков влияния //public
+	public float influenceRiseSpeed;    //Скорость восстановления очков влияния //public
+    public float influenceFallSpeed;    //Скорость растраты очков влияния       //public
+    public float coinFallSpeed;         //Скорость падения монеты //public
+    public float coinRiseSpeed;         //Скорость подъёма монеты //public
+    [SerializeField] float deposit;             //Объём депозита (денег для торговли)
+    [SerializeField] float initialPrice;            //Начальная для игровой сессии цена инструмента (тут и далее: инструмент это пара товаров (Евро/Доллар, например))
+    [SerializeField] float currentPrice;            //Текущая цена инструмента
+    [SerializeField] float supportPrice;            //Значение цены уровня сопротивления (верхняя красная граница)
+    [SerializeField] float resistancePrice;     //Значение цены уровня поддержки (нижняя зелёная граница)
+    [SerializeField] float openPrice;               //Цена открытия позиции (начала сделки)
+    [SerializeField] float closePrice;          //Цена закрытия позиции (конца сделки)
+    [SerializeField] float profit;              //Доход от сделки
+    [SerializeField] int quantity;				//Количество товара торгуемого инстумента
+	public int cycleCounter;            //Глобальный счётчик длительности игровой сессии //public
+    public float coinPosY;              //Значение позиции монеты по Y (техническая переменная) //public
+    [SerializeField] float spread;              //Коэффициент разницы цен между ценой сопротивления и поддержки
+    [SerializeField] float comission;				//Размер комиссии, отчисляемой брокеру при открытии позиции
+	public float influence;             //Текущее количество очков влияния //public
+    [SerializeField] float Devaluation;			//Коэффициент обесценивания инструмента при падении ниже линии поддержки
+	float coinFallSpeedStorage;
+    float coinRiseSpeedStorage;
 
-	public float topPositionProfit;		//Самый большой доход по сделке
-	public float topSessionProfit;		//Самый большой доход за сессию 
-	public float overallCycles;			//Длительность игровой сессии
-	public float experience;			//Накопленный опыт
-	public float finalScore;			//Количество очков опыта
+    [SerializeField] float topPositionProfit;       //Самый большой доход по сделке
+    [SerializeField] float topSessionProfit;        //Самый большой доход за сессию 
+    [SerializeField] float overallCycles;           //Длительность игровой сессии
+    [SerializeField] float experience;          //Накопленный опыт
+    [SerializeField] float finalScore;			//Количество очков опыта
 
 	float stock;						
 	float newSpread;
 	int newQuantity;
-	int gameState;
-	// int tutorStep;
-	public bool gameOver;
-	bool positionOpen;
+	GS gameState;
+	public bool gameOver; //public
+    bool positionOpen;
 	bool buying;
 	bool underSupport;
 	bool aboveResistance;
 	Vector3 panelY;
 
-	public AudioClip[] audioClip;
+    [SerializeField] AudioClip[] audioClip;
 	AudioSource audioPlayer;
 
-	public List <float> pauseGameList = new List <float>(); 
-	public RectTransform[] tutorialPanels;
+    [SerializeField] List <float> pauseGameList = new List <float>();
 	
-	public Scrollbar influenceBar;
-	public Scrollbar depositBar;
-	public Text depositText;
-	public Text influenceText;
-	public Text profitText;
-	public Text openPositionNumText;
-	public Text quantityText;
-	public Text resistancePriceText;
-	public Text supportPriceText;
-	public Text currentPriceText;
-	public RectTransform currentPricePanel;
-	public RectTransform openPositionPricePanel;
+	public Scrollbar influenceBar; //public
+    [SerializeField] Scrollbar depositBar;
+    [SerializeField] Text depositText;
+    [SerializeField] Text influenceText;
+    [SerializeField] Text profitText;
+    [SerializeField] Text openPositionNumText;
+    [SerializeField] Text quantityText;
+    [SerializeField] Text resistancePriceText;
+    [SerializeField] Text supportPriceText;
+    [SerializeField] Text currentPriceText;
+    [SerializeField] RectTransform currentPricePanel;
+    [SerializeField] RectTransform openPositionPricePanel;
 
-	public Scrollbar expBar;
-	public RectTransform gameOverPanel;
-	public RectTransform gamePausedPanel;
-	public RectTransform mainTutorialPanel;
-	public Text tPPText;
-	public Text tSPText;
-	public Text sLengthText;
-	public Text expText;
+    [SerializeField] Scrollbar expBar;
+    [SerializeField] RectTransform gameOverPanel;
+    [SerializeField] RectTransform gamePausedPanel;
+    [SerializeField] RectTransform mainTutorialPanel;
+    [SerializeField] Text tPPText;
+    [SerializeField] Text tSPText;
+    [SerializeField] Text sLengthText;
+    [SerializeField] Text expText;
+
+    Timer timer;
+
+    enum GS
+    {
+        Play,
+        Pause,
+        Over
+    }
 
 
 	void Awake()
 	{	
-		// if (instance = null) instance = this;
-		// else if (instance != this) Destroy(gameObject);
-		// DontDestroyOnLoad(gameObject);
+
 		instance = this;
-		StartGame();
+        timer = GetComponent<Timer>();
+        StartGame();
 		audioPlayer = GetComponent<AudioSource>();
 		gameOver = false;
 		PreRun ();
-
+        
 	}
 
 	void PreRun()
 	{
-		if (firstRun == true) { RunTutorial (0); PauseGame(0, 0, influenceRiseSpeed, influenceFallSpeed, gameSpeed);}
+		if (firstRun == true)
+        {
+            mainTutorialPanel.gameObject.SetActive(true);
+            mainTutorialPanel.GetComponent<Tutorial>().RunTutorial(0);
+            PauseGame(0, 0, influenceRiseSpeed, influenceFallSpeed, gameSpeed);
+        }
 	}
 
 	public void StartGame()
@@ -108,10 +119,12 @@ public class GameManager : MonoBehaviour {
 		quantity = 1;
 		gameOverPanel.gameObject.SetActive(false);
 		gamePausedPanel.gameObject.SetActive(false);
+        timer.StartTimer();
 	}
 
 	void Update() 
 	{
+        
 		currentPrice = Mathf.Round((initialPrice+coinPosY*(1/newSpread))*100.0f)/100.0f;
 		currentPriceText.text=currentPrice.ToString();
 
@@ -126,14 +139,14 @@ public class GameManager : MonoBehaviour {
 		if (positionOpen == true && buying == true)
 		{
 			profit = Mathf.Round(((currentPrice-openPrice)*quantity)*100.0f)/100.0f;
-			if (gameState == 0) deposit-=comission;
+			if (gameState == GS.Play) deposit-=comission;
 			Debug.Log("OP: " + openPrice + " | Current Price: " + currentPrice + " | Profit: " + profit);
 		}
 
 		else if (positionOpen == true && buying == false) 
 		{
 			profit = Mathf.Round(((openPrice-currentPrice)*quantity)*100.0f)/100.0f;
-			if (gameState == 0) deposit-=comission;
+			if (gameState == GS.Play) deposit-=comission;
 			Debug.Log("OP: " + openPrice + " | Current Price: " + currentPrice + " | Profit: " + profit);
 		}
 
@@ -171,14 +184,10 @@ public class GameManager : MonoBehaviour {
 		else depositText.color = new Color (0.49f, 0.49f, 0.49f);
 		
 	}
-	// public void initParameters (float gameSpeed, float influenceMax, float influenceRiseSpeed, float influenceFallSpeed, float coinFallSpeed, float coinRiseSpeed) 
-	// {
-
-	// }
 
 	public void OutOfBounds (bool support, bool stay)
 	{
-		if (gameState == 0)
+		if (gameState == GS.Play)
 		{
 			if (support == true && stay == true)
 			{	
@@ -311,7 +320,7 @@ public class GameManager : MonoBehaviour {
 
 	public void SoundManager(int clip)
 	{
-		audioPlayer.clip = audioClip[clip];
+		audioPlayer.clip = audioClip[clip]; //тут что-то сломалось
 		audioPlayer.Play();
 	}
 
@@ -327,86 +336,17 @@ public class GameManager : MonoBehaviour {
 
 	}
 
-	public void RunTutorial(int tutorStep)
-	{
-		if (tutorStep == 0)
-		{
-			mainTutorialPanel.gameObject.SetActive(true);
-			tutorialPanels[0].gameObject.SetActive(true);
-			tutorStep = 1;
-		} 
-
-		else if (tutorStep == 1)
-		{
-			tutorialPanels[0].gameObject.SetActive(false);
-			tutorialPanels[1].gameObject.SetActive(true);
-			tutorStep = 2;
-		}
-
-		else if (tutorStep == 2)
-		{
-			tutorialPanels[1].gameObject.SetActive(false);
-			tutorialPanels[2].gameObject.SetActive(true);
-			tutorStep = 3;
-		}
-
-		else if (tutorStep == 3)
-		{
-			tutorialPanels[2].gameObject.SetActive(false);
-			tutorialPanels[3].gameObject.SetActive(true);
-			tutorStep = 4;
-		}		
-
-		else if (tutorStep == 4)
-		{
-			tutorialPanels[3].gameObject.SetActive(false);
-			tutorialPanels[4].gameObject.SetActive(true);
-			tutorStep = 5;
-		}
-
-		else if (tutorStep == 5)
-		{
-			tutorialPanels[4].gameObject.SetActive(false);
-			tutorialPanels[5].gameObject.SetActive(true);
-			tutorStep = 6;
-		}
-
-		else if (tutorStep == 6)
-		{
-			tutorialPanels[5].gameObject.SetActive(false);
-			tutorialPanels[6].gameObject.SetActive(true);
-			tutorStep = 7;
-		}
-
-		else if (tutorStep == 7)
-		{
-			tutorialPanels[6].gameObject.SetActive(false);
-			firstRun = false;
-			mainTutorialPanel.gameObject.SetActive(false);
-			ResumeGame();
-		}
-
-		// else if (tutorStep == 8)
-		// {
-		// 	tutorialPanels[8].gameObject.SetActive(false);
-		// 	firstRun = false;
-		// 	mainTutorialPanel.gameObject.SetActive(false);
-		// 	ResumeGame();
-		// }
-
-	}
-
 	public void PauseButton()
 	{
-		if (gameState == 0)
+		if (gameState == GS.Play)
 		{
 			PauseGame(0, 0, 0, 0, 0);
-			gameState = 1;
+			gameState = GS.Pause;
 			gamePausedPanel.gameObject.SetActive(true);
 
 		}
 
-		else if (gameState == 1)
+		else if (gameState == GS.Pause)
 		{
 			ResumeGame();
 			gamePausedPanel.gameObject.SetActive(false);
@@ -425,7 +365,8 @@ public class GameManager : MonoBehaviour {
 		coinFallSpeed = coinFallSpd;
 		coinRiseSpeed = coinRsSpd;
 		influenceFallSpeed = infFallSpd;
-		gameSpeed = gameSpd;	
+		gameSpeed = gameSpd;
+        timer.PauseTimer();
 	}
 
 	public void ResumeGame()
@@ -435,8 +376,9 @@ public class GameManager : MonoBehaviour {
 		coinRiseSpeed = pauseGameList[2];
 		influenceFallSpeed = pauseGameList[3];
 		gameSpeed = pauseGameList[4];
-		gameState = 0;
+		gameState = GS.Play;
 		pauseGameList.Clear();
+        timer.ResumeTimer();
 	}
 
 	public void RestartGame()
@@ -471,16 +413,18 @@ public class GameManager : MonoBehaviour {
 
 		tPPText.text = topPositionProfit.ToString();
 		tSPText.text = topSessionProfit.ToString();
-		sLengthText.text = overallCycles.ToString();
+		sLengthText.text = timer.RoundedTimeSecs().ToString(); 
 		expText.text = finalScore.ToString();
 		expBar.size = finalScore/100;
-		Debug.Log("OVERALL SCORE:  " + finalScore + "  || Cycles: " + overallCycles + " || TPP: " + topPositionProfit + " || TSP: " + topSessionProfit + "\n EXPERIENCE: " + experience);
-		gameState = 2;
+
+        timer.PauseTimer();
+        Debug.Log("OVERALL SCORE:  " + finalScore + "  || Cycles: " + overallCycles + "  || Timer: " + timer.RoundedTimeSecs()
+            + " || TPP: " + topPositionProfit + " || TSP: " + topSessionProfit + "\n EXPERIENCE: " + experience);
+		gameState = GS.Over;
 	}
 
 	public void MainMenu ()
 	{
 		SceneManager.LoadScene (0);
-		// gameOverPanel.gameObject.SetActive(false);
 	}
 }
