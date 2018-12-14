@@ -2,61 +2,104 @@
 using System.Collections;
 using UnityEngine.UI;
 
-public class CoinController : MonoBehaviour
+public class CoinController : MonoBehaviour, IPauseble
 {
 	float oldRotZ;
 	float newRotZ;
 	float rotZ;
 	public float posY;
-	float coinInfluence;
+	public float coinInfluence;
 
-	// Use this for initialization
-	void Start ()
+    float coinFallSpeed;         //Скорость падения монеты //public 
+    float coinRiseSpeed;         //Скорость подъёма монеты //public
+    float pausedCoinFallSpeed;
+    float pausedCoinRiseSpeed;
+
+    [SerializeField] float maxCoinFallSpeed;
+    [SerializeField] float maxCoinRiseSpeed;
+
+    // Use this for initialization
+    void Start ()
     {
-		coinInfluence = GameManager.instance.influenceMax;
+
 	}
+
+    public void StartCoin(float influenceMax, float maxCoinFallSpeed, float maxCoinRiseSpeed)
+    {
+        coinInfluence = influenceMax;
+        coinFallSpeed = maxCoinFallSpeed;
+        coinRiseSpeed = maxCoinRiseSpeed;
+    }
 	
 	// Update is called once per frame
 	void Update ()
     {
 
-		GameManager.instance.influenceBar.size = coinInfluence/GameManager.instance.influenceMax;
+		//GameManager.instance.influenceBar.size = coinInfluence/GameManager.instance.influenceMax;
 
-		if (coinInfluence < GameManager.instance.influenceMax) coinInfluence += GameManager.instance.influenceRiseSpeed * Time.deltaTime; // / 100
-		rotZ = -100.0f * GameManager.instance.gameSpeed * Time.deltaTime;
-		transform.Rotate(0, 0, rotZ);
+		//if (coinInfluence < GameManager.instance.influenceMax) coinInfluence += GameManager.instance.influenceRiseSpeed * Time.deltaTime; // / 100
+		//rotZ = -100.0f * GameManager.instance.gameSpeed * Time.deltaTime;
+		//transform.Rotate(0, 0, rotZ);
 
-		//if(GameManager.instance.gameSpeed > 6.0f) GameManager.instance.gameSpeed -= 0.005f; //Что это вообще такое?
+  //      if (Input.GetMouseButton(0) || Input.touchCount > 0){
+		//	if (coinInfluence > 0.0f){ 
+		//		posY+=coinRiseSpeed * Time.deltaTime;// / 100
+  //              coinInfluence -= GameManager.instance.influenceFallSpeed* Time.deltaTime; // / 100 //economics
+  //          }
 
-		// fallY = fallY-=;
-		transform.position = new Vector3(1, posY-=GameManager.instance.coinFallSpeed * Time.deltaTime, 0); // / 100
+		//	if (coinInfluence < 0.01f) Input.ResetInputAxes(); //Зачем?
 
-        if (Input.GetMouseButton(0) || Input.touchCount > 0){
-			if (coinInfluence > 0.0f){ 
-				posY+=GameManager.instance.coinRiseSpeed * Time.deltaTime;// / 100
-                coinInfluence -= GameManager.instance.influenceFallSpeed* Time.deltaTime; // / 100
-                //if(GameManager.instance.gameSpeed < 18.0f) GameManager.instance.gameSpeed += 0.01f;
+		//}
+  //      else
+  //      {
+  //          posY -= coinFallSpeed * Time.deltaTime;
+  //      }
+  //      transform.position = new Vector3(1, posY, 0); // / 100
+
+		//GameManager.instance.influence = coinInfluence;
+	}
+
+    public void CoinUpdate(float influenceMax, float influenceRiseSpeed, float influenceFallSpeed, float deltaTime, float gameSpeed)
+    {
+
+
+        if (coinInfluence < influenceMax) coinInfluence += influenceRiseSpeed * deltaTime; // / 100
+        rotZ = -100.0f * gameSpeed * deltaTime;
+        transform.Rotate(0, 0, rotZ);
+
+        if (Input.GetMouseButton(0) || Input.touchCount > 0)
+        {
+            if (coinInfluence > 0.0f)
+            {
+                posY += coinRiseSpeed * deltaTime;// / 100
+                coinInfluence -= influenceFallSpeed * deltaTime; // / 100 //economics
             }
 
-			if (coinInfluence < 0.01f) Input.ResetInputAxes(); //Зачем?
+            if (coinInfluence < 0.01f) Input.ResetInputAxes(); //Зачем?
 
-		}
+        }
+        else
+        {
+            posY -= coinFallSpeed * deltaTime;
+        }
+        transform.position = new Vector3(1, posY, 0); // / 100
 
-		GameManager.instance.coinPosY = posY;
-		GameManager.instance.influence = coinInfluence;
-	}
+
+    }
 
 	void OnTriggerEnter2D(Collider2D coll)
 	{
 		if (coll.gameObject.tag == "LowerCol")
 			{
-				GameManager.instance.OutOfBounds (true, true);
+                coinFallSpeed = 0;
+                GameManager.instance.OutOfBounds (true, true);
 			} 
 
 
 		if (coll.gameObject.tag == "UpperCol")
 			{
-				GameManager.instance.OutOfBounds (false, true);
+                coinRiseSpeed = 0;
+                GameManager.instance.OutOfBounds (false, true);
 				Input.ResetInputAxes();
 			}
 
@@ -70,15 +113,30 @@ public class CoinController : MonoBehaviour
 	{
 		if (coll.gameObject.tag == "LowerCol")
 			{
-				GameManager.instance.OutOfBounds (true, false);
+                coinFallSpeed = maxCoinFallSpeed;
+
+                GameManager.instance.OutOfBounds (true, false);
 			} 
 
 
 		if (coll.gameObject.tag == "UpperCol")
 			{
-				GameManager.instance.OutOfBounds (false, false);
+                coinRiseSpeed = maxCoinRiseSpeed;
+                GameManager.instance.OutOfBounds (false, false);
 			} 
 	}
 
+    public void Pause()
+    {
+        pausedCoinRiseSpeed = coinRiseSpeed;
+        pausedCoinFallSpeed = coinFallSpeed;
+        coinRiseSpeed = 0f;
+        coinFallSpeed = 0f;
+    }
 
+    public void Resume()
+    {
+        coinRiseSpeed = pausedCoinRiseSpeed;
+        coinFallSpeed = pausedCoinFallSpeed;
+    }
 }
