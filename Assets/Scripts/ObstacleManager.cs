@@ -34,7 +34,7 @@ public class ObstacleManager : MonoBehaviour {
 
 	void Spawn () 
 	{
-		Debug.Log("SPAWN!");
+		//Debug.Log("SPAWN!");
 		transform.position = new Vector3 (transform.position.x, Random.Range(3.0f,1.0f), 0);
 		lastSpawnedCandle = Instantiate (candleCollider, transform.position, transform.rotation);
     }

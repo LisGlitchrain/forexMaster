@@ -9,76 +9,53 @@ public class GameManager : MonoBehaviour {
 	public static GameManager instance = null;
 	public bool firstRun;
 	public float gameSpeed;             //Общая скорость игры //public
+    public bool gameOver;               //public
+    public int cycleCounter;            //Глобальный счётчик длительности игровой сессии //public
     Timer timer;
     float gameSpeedPause;
     GS gameState;
-    public bool gameOver; //public
-    public int cycleCounter;            //Глобальный счётчик длительности игровой сессии //public
 
     [SerializeField] CoinController coin;
     [SerializeField] Economics economics;
-
-    //Economics
-    //public float influenceMax;                  //Максимальное количество очков влияния //public
-    //public float influenceRiseSpeed;            //Скорость восстановления очков влияния //public
-    //public float influenceFallSpeed;            //Скорость растраты очков влияния       //public
-    //[SerializeField] float deposit;             //Объём депозита (денег для торговли)
-    //[SerializeField] float initialPrice;        //Начальная для игровой сессии цена инструмента (тут и далее: инструмент это пара товаров (Евро/Доллар, например))
-    //[SerializeField] float currentPrice;        //Текущая цена инструмента
-    //[SerializeField] float supportPrice;        //Значение цены уровня сопротивления (верхняя красная граница)
-    //[SerializeField] float resistancePrice;     //Значение цены уровня поддержки (нижняя зелёная граница)
-    //[SerializeField] float openPrice;           //Цена открытия позиции (начала сделки)
-    //[SerializeField] float closePrice;          //Цена закрытия позиции (конца сделки)
-    //[SerializeField] float profit;              //Доход от сделки
-    //[SerializeField] int quantity;				//Количество товара торгуемого инстумента
-    //[SerializeField] float spread;              //Коэффициент разницы цен между ценой сопротивления и поддержки
-    //[SerializeField] float comission;           //Размер комиссии, отчисляемой брокеру при открытии позиции
-    //public float influence;                     //Текущее количество очков влияния //public
-    //[SerializeField] float Devaluation;         //Коэффициент обесценивания инструмента при падении ниже линии поддержки
-    //float stock;
-    //float newSpread;
-    //int newQuantity;
-
+    [SerializeField] UIManager uiManager;
     [SerializeField] float topPositionProfit;       //Самый большой доход по сделке
     [SerializeField] float topSessionProfit;        //Самый большой доход за сессию 
     [SerializeField] float overallCycles;           //Длительность игровой сессии
     [SerializeField] float experience;          //Накопленный опыт
     [SerializeField] float finalScore;			//Количество очков опыта
 
-
-    //??
+    //logic
     bool positionOpen;
 	bool buying;
 	bool underSupport;
 	bool aboveResistance;
 
-    //Ui кажись
     //Audio
     [SerializeField] AudioClip[] audioClip;
 	AudioSource audioPlayer;
 
     //UI
     Vector3 panelY;
-    public Scrollbar influenceBar; //public
-    [SerializeField] Scrollbar depositBar;
-    [SerializeField] Text depositText;
-    [SerializeField] Text influenceText;
-    [SerializeField] Text profitText;
-    [SerializeField] Text openPositionNumText;
-    [SerializeField] Text quantityText;
-    [SerializeField] Text resistancePriceText;
-    [SerializeField] Text supportPriceText;
-    [SerializeField] Text currentPriceText;
-    [SerializeField] RectTransform currentPricePanel;
-    [SerializeField] RectTransform openPositionPricePanel;
-    [SerializeField] Scrollbar expBar;
-    [SerializeField] RectTransform gameOverPanel;
-    [SerializeField] RectTransform gamePausedPanel;
-    [SerializeField] RectTransform mainTutorialPanel;
-    [SerializeField] Text tPPText;
-    [SerializeField] Text tSPText;
-    [SerializeField] Text sLengthText;
-    [SerializeField] Text expText;
+    public Scrollbar influenceBar; //public //size, fade
+    [SerializeField] Scrollbar depositBar; //size, fade
+    [SerializeField] Text depositText; //text //можно получать из чайлда, а не напрямую
+    [SerializeField] Text influenceText; //text //можно получать из чайлда, а не напрямую
+    [SerializeField] Text profitText;   //text
+    [SerializeField] Text openPositionNumText;  //text
+    [SerializeField] Text quantityText; //text
+    [SerializeField] Text resistancePriceText;  //text
+    [SerializeField] Text supportPriceText; //text //можно получать из чайлда, а не напрямую
+    [SerializeField] Text currentPriceText; //text //можно получать из чайлда, а не напрямую
+    [SerializeField] RectTransform currentPricePanel;   //yposition, 
+    [SerializeField] RectTransform openPositionPricePanel; //ypos
+    [SerializeField] Scrollbar expBar; //size
+    [SerializeField] RectTransform gameOverPanel; //active
+    [SerializeField] RectTransform gamePausedPanel;  //active
+    [SerializeField] RectTransform mainTutorialPanel; //???
+    [SerializeField] Text tPPText; //text
+    [SerializeField] Text tSPText;  //text
+    [SerializeField] Text sLengthText;  //text
+    [SerializeField] Text expText;  //text
 
     public enum GS
     {
@@ -89,14 +66,12 @@ public class GameManager : MonoBehaviour {
 
 	void Awake()
 	{	
-
 		instance = this;
         timer = GetComponent<Timer>();
         StartGame();
 		audioPlayer = GetComponent<AudioSource>();
 		gameOver = false;
-		PreRun ();
-        
+		PreRun ();        
 	}
 
 	void PreRun()
@@ -114,6 +89,7 @@ public class GameManager : MonoBehaviour {
 		gameOver = false;
         economics.StartEconomics();
         SetPrices();
+        coin.StartCoin(economics.influenceMax);
         positionOpen = false;
 		gameOverPanel.gameObject.SetActive(false);
 		gamePausedPanel.gameObject.SetActive(false);
@@ -122,18 +98,19 @@ public class GameManager : MonoBehaviour {
 
 	void Update() 
 	{
-        coin.CoinUpdate(economics.influenceMax,economics.influenceRiseSpeed, economics.influenceFallSpeed, Time.deltaTime, gameSpeed);
-        economics.influence = coin.coinInfluence;
-        economics.UpdateCurrentPrice(coin);
-        economics.ProfitDepositMath(gameState, positionOpen, buying);
-        if (underSupport == true)
-		{
+        if (gameState == GS.Play)
+        {
+            coin.CoinUpdate(Time.deltaTime, gameSpeed, economics.PriceToDeltaPos);
+            economics.UpdateCurrentPrice(Time.deltaTime, Input.touchCount, Input.GetMouseButton(0));
+            economics.ProfitDepositMath(gameState, positionOpen, buying);
             economics.Devaluation(Time.deltaTime);
-		}
-		if (aboveResistance == true)
-		{
-            economics.MaxInfluenceDevaluation(Time.deltaTime);
-		}
+            economics.InfluenceDevaluation(Time.deltaTime);
+            if (economics.GetEconomicChanged())
+            {
+                OutOfBounds(economics.EcoStatus);
+            }
+        }
+
         //stats
 		if (cycleCounter == 60)
 		{
@@ -142,7 +119,7 @@ public class GameManager : MonoBehaviour {
 		}
 
         //myUI
-        influenceBar.size = coin.coinInfluence / economics.influenceMax; //ui
+        influenceBar.size = economics.influence / economics.influenceMax; //ui
         //ui
         panelY = Camera.main.WorldToScreenPoint(new Vector3(-7.81f, coin.posY - 3.05f, 0.0f)); //нужна ли здесь panelY? НУЖНА
         currentPricePanel.localPosition = panelY;
@@ -151,10 +128,10 @@ public class GameManager : MonoBehaviour {
         //ui
         currentPriceText.text = economics.CurrentPrice.ToString();
         depositText.text = economics.RndDeposit.ToString(); //depositRnd.ToString();
-        profitText.text = economics.profit.ToString();
+        profitText.text = economics.Profit.ToString();
         //ui
-        if (economics.profit > 0) profitText.color = new Color(0, 182, 0);
-        else if (economics.profit < 0) profitText.color = new Color(182, 0, 0);
+        if (economics.Profit > 0) profitText.color = new Color(0, 182, 0);
+        else if (economics.Profit < 0) profitText.color = new Color(182, 0, 0);
         else profitText.color = new Color(240, 240, 240);
         //ui
         influenceText.text = economics.RoundInfluence().ToString();
@@ -165,38 +142,23 @@ public class GameManager : MonoBehaviour {
     }
 
     //mostlyUI
-    public void OutOfBounds (bool support, bool stay)
+    public void OutOfBounds (Economics.EcoState ecoState)
 	{
-		if (gameState == GS.Play)
+		if (ecoState == Economics.EcoState.lower)
+		{	
+			depositBar.GetComponent<Image>().CrossFadeColor(Color.red, 0.3f, false, false);
+			SoundManager(4);
+		} 
+		else if (ecoState == Economics.EcoState.upper) 
 		{
-			if (support == true && stay == true)
-			{	
-				underSupport = true; //notUI
-				depositBar.GetComponent<Image>().CrossFadeColor(Color.red, 0.3f, false, false);
-				SoundManager(4);
-			} 
-
-			if (support == false && stay == true) 
-			{
-				aboveResistance = true;//notUI
-                influenceBar.GetComponent<Image>().CrossFadeColor(Color.red, 0.3f, false, false);
-				SoundManager(4);
-			}			
-
-			if (support == true && stay == false) 
-			{
-				underSupport = false;//notUI
-                depositBar.GetComponent<Image>().CrossFadeColor(Color.white, 0.3f, false, false);
-			}
-
-			if (support == false && stay == false)
-			{
-                aboveResistance = false;//notUI
-                influenceBar.GetComponent<Image>().CrossFadeColor(Color.white, 0.3f, false, false);
-			}
+            influenceBar.GetComponent<Image>().CrossFadeColor(Color.red, 0.3f, false, false);
+			SoundManager(4);
+		}			
+        else 
+		{
+            depositBar.GetComponent<Image>().CrossFadeColor(Color.white, 0.3f, false, false);
+            influenceBar.GetComponent<Image>().CrossFadeColor(Color.white, 0.3f, false, false);
 		}
-
-		// else Debug.Log("RanAway");
 	}
 
 	public void SetQuantity (int setQuantity)
@@ -205,6 +167,7 @@ public class GameManager : MonoBehaviour {
 			{
                 economics.SetQuantity(setQuantity);
 			}
+        //ui
 		quantityText.text = economics.Quantity.ToString();
 		SoundManager(3);
 	}
@@ -213,14 +176,18 @@ public class GameManager : MonoBehaviour {
 	{
 		if (positionOpen == false) 
 		{
-			PositionManager(true, true, economics.CurrentPrice, economics.Quantity); //ui?
-			openPositionPricePanel.localPosition = panelY;
+            buying = true;
+            PositionManager(true,economics.CurrentPrice, economics.Quantity); //ui?
+            //ui
+            openPositionPricePanel.localPosition = panelY;
 		}
 		else 
 		{
-			PositionManager(false, true, economics.CurrentPrice, 0); //ui?
+            buying = true;
+            PositionManager(false, economics.CurrentPrice, 0); //ui?
+            //ui
             openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0); //ui
-			if (economics.profit > 0) SoundManager(1);
+			if (economics.Profit > 0) SoundManager(1);
 			else  SoundManager(2);  
 		}
 	}
@@ -230,48 +197,54 @@ public class GameManager : MonoBehaviour {
 	{
 		if (economics.PositionOpen == false) 
 		{
-			PositionManager(true, false, economics.CurrentPrice, economics.Quantity);
-			openPositionPricePanel.localPosition = panelY;
+            buying = false;
+            PositionManager(true,  economics.CurrentPrice, economics.Quantity);
+
+            openPositionPricePanel.localPosition = panelY;
 			Debug.Log(panelY);
 			SoundManager(0);
 		}
 		else 
 		{
-			PositionManager(false, false, economics.CurrentPrice, 0);
-			openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0);
-			if (economics.profit > 0) SoundManager(1);
+            buying = false;
+            PositionManager(false, economics.CurrentPrice, 0);
+
+            openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0);
+			if (economics.Profit > 0) SoundManager(1);
 			else  SoundManager(2); 
 		}
 	}
     // Здесь что-то страшное происходит Надо пересмотреть метод
-	public void PositionManager (bool open, bool buy, float price, int quantity)
+	public void PositionManager (bool open, float price, int quantity)
 	{
 		if ((price*quantity) <= economics.Deposit)
 		{
+            //Переменные == true? Исправить
 			if (open == true)
 			{
-				if (buy == true) buying = true; else buying = false;
                 economics.OpenPrice = price;
 				economics.stock = economics.OpenPrice*quantity;
-				//float oldDeposit = economics.Deposit;
-                economics.Deposit = economics.Deposit - (economics.OpenPrice*quantity); //oldDeposit - ...
+                economics.Deposit -=(economics.OpenPrice*quantity); 
 				positionOpen = true; 
+
 				openPositionNumText.text = economics.OpenPrice.ToString(); //ui
-				SoundManager(0);
+				SoundManager(0); //Что? о.о
 				SoundManager(0);
 			}
 			if (open == false)
 			{
                 economics.OpenPrice = price;
-                economics.Deposit += (economics.profit+economics.stock);
+                economics.Deposit += (economics.Profit+economics.stock);
 				positionOpen = false;
+
                 openPositionNumText.text = economics.OpenPrice.ToString(); //ui
-                ProgressStorage(0, economics.profit);
+                ProgressStorage(0, economics.Profit);
 			}
 		}
 		else 
 		{
 			Debug.Log("No money, no honey!");
+            //ui
 			openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0);
 		}
 	}
@@ -349,11 +322,11 @@ public class GameManager : MonoBehaviour {
 		PauseGame(0);
 		economics.Comission = 0;
 		if (positionOpen == true) economics.Deposit = 0;
-		economics.profit = 0;
+		economics.Profit = 0;
 		ScoreCounter (overallCycles, topPositionProfit, topSessionProfit);
 		positionOpen = false;
 		// experience += finalScore;
-
+        //ui
 		tPPText.text = topPositionProfit.ToString();
 		tSPText.text = topSessionProfit.ToString();
 		sLengthText.text = timer.RoundedTimeSecs().ToString(); 

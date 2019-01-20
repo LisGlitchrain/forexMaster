@@ -8,41 +8,55 @@ public class Economics : MonoBehaviour, IPauseble {
     public float influenceRiseSpeed;            //Скорость восстановления очков влияния //public
     public float influenceFallSpeed;            //Скорость растраты очков влияния       //public
     public float influence;                     //Текущее количество очков влияния //public
-    //[SerializeField] float deposit;             //Объём депозита (денег для торговли)
-    public float Deposit { get; set; }
-    public float RndDeposit { get { return Mathf.Round((Deposit * 100.0f) / 100.0f); } }
+    public int Quantity { get; set; }				//Количество товара торгуемого инстумента
+    public float OpenPrice { get; set; }           //Цена открытия позиции (начала сделки)
+    public float Profit { get ; set; }              //Доход от сделки
+
     [SerializeField] float initialPrice;        //Начальная для игровой сессии цена инструмента (тут и далее: инструмент это пара товаров (Евро/Доллар, например))
     [SerializeField] float currentPrice;        //Текущая цена инструмента
-    public float CurrentPrice { get { return currentPrice; } set { currentPrice = value; } }
     [SerializeField] float supportPrice;        //Значение цены уровня сопротивления (верхняя красная граница)
-    public float SupportPrice { get { return supportPrice; } set { supportPrice = value; } }
     [SerializeField] float resistancePrice;     //Значение цены уровня поддержки (нижняя зелёная граница)
-    public float ResistancePrice { get { return resistancePrice; } set { resistancePrice = value; } }
-
-    public float OpenPrice { get; set; }           //Цена открытия позиции (начала сделки)
     [SerializeField] float closePrice;          //Цена закрытия позиции (конца сделки)
-    public float profit { get; set; }              //Доход от сделки
-    public int Quantity { get; set; }				//Количество товара торгуемого инстумента
     [SerializeField] float spread;              //Коэффициент разницы цен между ценой сопротивления и поддержки
     [SerializeField] float devaluation;         //Коэффициент обесценивания инструмента при падении ниже линии поддержки
+    [SerializeField] float influenceDevaluation;
     [SerializeField] float comission;           //Размер комиссии, отчисляемой брокеру при открытии позиции
-    public float Comission { get { return comission; } set { comission = value; } }
+    [SerializeField] float currentPriceRiseSpeed;
+    [SerializeField] float currentPriceFallSpeed;
+    EcoState newEcoState = EcoState.middle;
+    EcoState ecoState = EcoState.middle;
     public float stock;
     float newSpread;
     int newQuantity;
-    public bool PositionOpen { get; set; }
-    public bool PositionClose { get; set; }
-
-
-    public Vector3 PanelY { get; set; }
     float pauseInfluenceRiseSpeed;
     float pauseInfluenceFallSpeed;
 
+    public bool PositionOpen { get; set; }
+    public bool PositionClose { get; set; }
+    public float Deposit { get; set; }
+    public float RndDeposit { get { return Mathf.Round((Deposit * 100.0f) / 100.0f); } }
+    public float CurrentPrice { get { return currentPrice; } set { currentPrice = value; } }
+    public float PriceToDeltaPos { get { return (currentPrice - initialPrice)*3; } }
+    public float SupportPrice { get { return supportPrice; } set { supportPrice = value; } }
+    public float ResistancePrice { get { return resistancePrice; } set { resistancePrice = value; } }
+    public float Comission { get { return comission; } set { comission = value; } }
+    public EcoState EcoStatus { get { return ecoState; } }
+    public Vector3 PanelY { get; set; }
+
+    public enum EcoState
+    {
+        upper,
+        middle,
+        lower
+    }
+
     public void StartEconomics()
     {
-        currentPrice = initialPrice;
-        Quantity = 1;
         SetPrices();
+        currentPrice = initialPrice;
+        influence = 2f;
+        Quantity = 1;
+        Deposit = 200f;
     }
 
     public void Pause()
@@ -71,30 +85,59 @@ public class Economics : MonoBehaviour, IPauseble {
 
     public void SetPrices()
     {
-        initialPrice = Mathf.Round(initialPrice * 100f) / 100f;
-        resistancePrice = Mathf.Round((initialPrice * spread) * 100f) / 100f;
-        supportPrice = Mathf.Round((initialPrice / spread) * 100f) / 100f;
+        initialPrice = Rounder.RoundToHundredth(initialPrice);
+        resistancePrice = Rounder.RoundToHundredth(initialPrice * spread);
+        supportPrice = Rounder.RoundToHundredth(initialPrice / spread);
         newSpread = resistancePrice - supportPrice;
     }
 
     public void Devaluation(float deltaTime)
     {
-        Deposit -= Mathf.Lerp(0, devaluation, deltaTime * 5.0f);
+        if (ecoState == EcoState.lower)
+            Deposit -= devaluation * deltaTime;
     }
 
-    public void MaxInfluenceDevaluation(float deltaTime)
+    public void InfluenceDevaluation(float deltaTime)
     {
-        influenceMax -= Mathf.Lerp(0, devaluation, deltaTime * 5.0f);
+        if (ecoState == EcoState.upper)
+            influence -= influenceDevaluation * deltaTime;
     }
 
     public float RoundInfluence()
     {
-        return Mathf.Round((influence * 100.0f) / 100.0f);
+        return Rounder.RoundToHundredth(influence);
     }
 
-    public void UpdateCurrentPrice(CoinController coin)
+    public void UpdateCurrentPrice(float deltatime, int touchCount, bool lmbPressed)
     {
-        currentPrice = Mathf.Round((initialPrice + coin.posY * (1 / newSpread)) * 100.0f) / 100.0f;
+        //АААААА!!!11111 coin.posY Здесь использовать нельзя ! обратная зависимость
+        if ((touchCount > 0 || lmbPressed) && currentPrice < resistancePrice+ 0.3) //Нужно подниматься чуть выше границы
+        {
+            currentPrice = Rounder.RoundToHundredth(currentPrice + currentPriceRiseSpeed * deltatime); //coin.posY * (1 / newSpread)=
+        }
+        else if (currentPrice > supportPrice-0.3) //Нужно опускаться чуть ниже границы
+        {
+            currentPrice = Rounder.RoundToHundredth(currentPrice - currentPriceFallSpeed * deltatime); //coin.posY * (1 / newSpread)
+        }
+    }
+
+    public bool GetEconomicChanged()
+    {
+        if (currentPrice> resistancePrice)
+            newEcoState = EcoState.upper;
+        else if(currentPrice < supportPrice)
+            newEcoState = EcoState.lower;
+        else
+            newEcoState = EcoState.middle;
+        if (ecoState != newEcoState)
+        {
+            ecoState = newEcoState;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public void ProfitDepositMath(GameManager.GS gameState, bool positionOpen, bool buying)
@@ -102,18 +145,20 @@ public class Economics : MonoBehaviour, IPauseble {
         //profit + deposit math
         if (positionOpen == true && buying == true)
         {
-            profit = Mathf.Round(((currentPrice - OpenPrice) * Quantity) * 100.0f) / 100.0f;
-            if (gameState == GameManager.GS.Play) Deposit -= comission;
+            Profit = Rounder.RoundToHundredth((currentPrice - OpenPrice) * Quantity);
+            //if (gameState == GameManager.GS.Play) Deposit -= comission;
             //Debug.Log("OP: " + economics.OpenPrice + " | Current Price: " + economics.CurrentPrice + " | Profit: " + economics.profit);
         }
         else if (positionOpen == true && buying == false)
         {
-            profit = Mathf.Round(((OpenPrice - currentPrice) * Quantity) * 100.0f) / 100.0f;
-            if (gameState == GameManager.GS.Play) Deposit -= comission;
+            Profit = Rounder.RoundToHundredth((OpenPrice - currentPrice) * Quantity);
+            //if (gameState == GameManager.GS.Play) Deposit -= comission;
             //Debug.Log("OP: " + economics.OpenPrice + " | Current Price: " + economics.CurrentPrice + " | Profit: " + economics.profit);
         }
-        else profit = 0;
+        else Profit = 0;
         //float oldDeposit = deposit;
         Deposit = Mathf.Round(Deposit * 100) / 100;
+
     }
+
 }
