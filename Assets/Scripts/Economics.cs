@@ -34,9 +34,9 @@ public class Economics : MonoBehaviour, IPauseble {
     public bool PositionOpen { get; set; }
     public bool PositionClose { get; set; }
     public float Deposit { get; set; }
-    public float RndDeposit { get { return Mathf.Round((Deposit * 100.0f) / 100.0f); } }
+    public float RndDeposit { get { return Rounder.RoundToHundredth(Deposit); } }
     public float CurrentPrice { get { return currentPrice; } set { currentPrice = value; } }
-    public float PriceToDeltaPos { get { return (currentPrice - initialPrice)*3; } }
+    public float PriceToDeltaPos { get { return (currentPrice - initialPrice)*3.5f; } }
     public float SupportPrice { get { return supportPrice; } set { supportPrice = value; } }
     public float ResistancePrice { get { return resistancePrice; } set { resistancePrice = value; } }
     public float Comission { get { return comission; } set { comission = value; } }
@@ -140,7 +140,7 @@ public class Economics : MonoBehaviour, IPauseble {
         }
     }
 
-    public void ProfitDepositMath(GameManager.GS gameState, bool positionOpen, bool buying)
+    public void ProfitMath(GameManager.GS gameState, bool positionOpen, bool buying)
     {
         //profit + deposit math
         if (positionOpen == true && buying == true)
@@ -157,7 +157,7 @@ public class Economics : MonoBehaviour, IPauseble {
         }
         else Profit = 0;
         //float oldDeposit = deposit;
-        Deposit = Mathf.Round(Deposit * 100) / 100;
+        //Deposit = Mathf.Round(Deposit * 100) / 100;
 
     }
 

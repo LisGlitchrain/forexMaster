@@ -2,13 +2,13 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;	
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour {
 
-	public static GameManager instance = null;
-	public bool firstRun;
-	public float gameSpeed;             //Общая скорость игры //public
+    public static GameManager instance = null;
+    public bool firstRun;
+    public float gameSpeed;             //Общая скорость игры //public
     public bool gameOver;               //public
     public int cycleCounter;            //Глобальный счётчик длительности игровой сессии //public
     Timer timer;
@@ -26,13 +26,13 @@ public class GameManager : MonoBehaviour {
 
     //logic
     bool positionOpen;
-	bool buying;
-	bool underSupport;
-	bool aboveResistance;
+    bool buying;
+    bool underSupport;
+    bool aboveResistance;
 
     //Audio
     [SerializeField] AudioClip[] audioClip;
-	AudioSource audioPlayer;
+    AudioSource audioPlayer;
 
     //UI
     Vector3 panelY;
@@ -56,6 +56,8 @@ public class GameManager : MonoBehaviour {
     [SerializeField] Text tSPText;  //text
     [SerializeField] Text sLengthText;  //text
     [SerializeField] Text expText;  //text
+    [SerializeField] GameObject panelBuySellBtns;
+    [SerializeField] GameObject panelClosePosBtn;
 
     public enum GS
     {
@@ -102,7 +104,7 @@ public class GameManager : MonoBehaviour {
         {
             coin.CoinUpdate(Time.deltaTime, gameSpeed, economics.PriceToDeltaPos);
             economics.UpdateCurrentPrice(Time.deltaTime, Input.touchCount, Input.GetMouseButton(0));
-            economics.ProfitDepositMath(gameState, positionOpen, buying);
+            economics.ProfitMath(gameState, positionOpen, buying);
             economics.Devaluation(Time.deltaTime);
             economics.InfluenceDevaluation(Time.deltaTime);
             if (economics.GetEconomicChanged())
@@ -174,56 +176,55 @@ public class GameManager : MonoBehaviour {
 
 	public void OpenBuyPosition ()
 	{
-		if (positionOpen == false) 
+        buying = true;
+        if (positionOpen == false) 
 		{
-            buying = true;
-            PositionManager(true,economics.CurrentPrice, economics.Quantity); //ui?
+            positionOpen = true;
+            PositionManager(true, economics.Quantity); //ui?
             //ui
             openPositionPricePanel.localPosition = panelY;
-		}
-		else 
-		{
-            buying = true;
-            PositionManager(false, economics.CurrentPrice, 0); //ui?
-            //ui
-            openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0); //ui
-			if (economics.Profit > 0) SoundManager(1);
-			else  SoundManager(2);  
-		}
+            panelBuySellBtns.SetActive(false);
+            panelClosePosBtn.SetActive(true);
+        }
 	}
 
     //ui?
 	public void OpenSellPosition ()
 	{
-		if (economics.PositionOpen == false) 
+        buying = false;
+        if (economics.PositionOpen == false) 
 		{
-            buying = false;
-            PositionManager(true,  economics.CurrentPrice, economics.Quantity);
-
+            positionOpen = true;
+            PositionManager(true,  economics.Quantity);
+            //ui
             openPositionPricePanel.localPosition = panelY;
-			Debug.Log(panelY);
 			SoundManager(0);
-		}
-		else 
-		{
-            buying = false;
-            PositionManager(false, economics.CurrentPrice, 0);
-
-            openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0);
-			if (economics.Profit > 0) SoundManager(1);
-			else  SoundManager(2); 
-		}
+            panelBuySellBtns.SetActive(false);
+            panelClosePosBtn.SetActive(true);
+        }
 	}
+
+    public void ClosePosition()
+    {
+        PositionManager(false, 0);
+        positionOpen = false;
+        //ui
+        openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0); //ui
+        if (economics.Profit > 0) SoundManager(1);
+        else SoundManager(2);
+        panelBuySellBtns.SetActive(true);
+        panelClosePosBtn.SetActive(false);
+    }
     // Здесь что-то страшное происходит Надо пересмотреть метод
-	public void PositionManager (bool open, float price, int quantity)
+	public void PositionManager (bool open, int quantity)
 	{
-		if ((price*quantity) <= economics.Deposit)
+		if ((economics.CurrentPrice * quantity) <= economics.Deposit)
 		{
             //Переменные == true? Исправить
 			if (open == true)
 			{
-                economics.OpenPrice = price;
-				economics.stock = economics.OpenPrice*quantity;
+                economics.OpenPrice = economics.CurrentPrice;
+                economics.stock = economics.OpenPrice*quantity;
                 economics.Deposit -=(economics.OpenPrice*quantity); 
 				positionOpen = true; 
 
@@ -233,7 +234,7 @@ public class GameManager : MonoBehaviour {
 			}
 			if (open == false)
 			{
-                economics.OpenPrice = price;
+                economics.OpenPrice = economics.CurrentPrice;
                 economics.Deposit += (economics.Profit+economics.stock);
 				positionOpen = false;
 
