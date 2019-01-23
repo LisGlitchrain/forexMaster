@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Economics : MonoBehaviour, IPauseble {
+public class Economics : MonoBehaviour {
 
     public float influenceMax;                  //Максимальное количество очков влияния //public
     public float influenceRiseSpeed;            //Скорость восстановления очков влияния //public
@@ -33,6 +33,7 @@ public class Economics : MonoBehaviour, IPauseble {
 
     public bool PositionOpen { get; set; }
     public bool PositionClose { get; set; }
+    public bool Buying { get; set; }
     public float Deposit { get; set; }
     public float RndDeposit { get { return Rounder.RoundToHundredth(Deposit); } }
     public float CurrentPrice { get { return currentPrice; } set { currentPrice = value; } }
@@ -57,30 +58,77 @@ public class Economics : MonoBehaviour, IPauseble {
         influence = 2f;
         Quantity = 1;
         Deposit = 200f;
+        PositionOpen = false;
     }
 
-    public void Pause()
-    {
-        pauseInfluenceRiseSpeed = influenceRiseSpeed;
-        pauseInfluenceFallSpeed = influenceFallSpeed;
-        influenceRiseSpeed = 0f;
-        influenceFallSpeed = 0f;
-    }
+    //public void Pause()
+    //{
+    //    pauseInfluenceRiseSpeed = influenceRiseSpeed;
+    //    pauseInfluenceFallSpeed = influenceFallSpeed;
+    //    influenceRiseSpeed = 0f;
+    //    influenceFallSpeed = 0f;
+    //}
 
-    public void Resume()
-    {
-        influenceFallSpeed = pauseInfluenceFallSpeed;
-        influenceRiseSpeed = pauseInfluenceRiseSpeed;
-    }
+    //public void Resume()
+    //{
+    //    influenceFallSpeed = pauseInfluenceFallSpeed;
+    //    influenceRiseSpeed = pauseInfluenceRiseSpeed;
+    //}
 
     public void SetQuantity(int setQuantity)
     {
-        newQuantity = Quantity + setQuantity; //+=? What?
-        if (newQuantity > 1)
+        if (!PositionOpen)
         {
-            Quantity = newQuantity;
+            newQuantity = Quantity + setQuantity; //+=? What?
+            if (newQuantity > 1)
+            {
+                Quantity = newQuantity;
+            }
+            else Quantity = 1;
         }
-        else Quantity = 1;
+
+    }
+
+    public bool OpenBuyPosition()
+    {
+        Buying = true;
+        if (PositionOpen == false && (CurrentPrice * Quantity) <= Deposit)
+        {
+            PositionOpen = true;
+            OpenPrice = CurrentPrice;
+            stock = OpenPrice * Quantity;
+            Deposit -= (OpenPrice * Quantity);
+            return true;
+        }
+        else return false;
+    }
+
+    //ui?
+    public bool OpenSellPosition()
+    {
+        Buying = false;
+        if (PositionOpen == false && (CurrentPrice * Quantity) <= Deposit)
+        {
+            PositionOpen = true;
+            OpenPrice = CurrentPrice;
+            stock = OpenPrice * Quantity;
+            Deposit -= (OpenPrice * Quantity);
+            return true;
+        }
+        else return false;
+    }
+
+    public bool ClosePosition()
+    {
+        if (PositionOpen)
+        {
+            OpenPrice = CurrentPrice;
+            Deposit += (Profit + stock);
+            PositionOpen = false;
+            return true;
+        }
+        else return false;
+
     }
 
     public void SetPrices()
@@ -140,16 +188,16 @@ public class Economics : MonoBehaviour, IPauseble {
         }
     }
 
-    public void ProfitMath(GameManager.GS gameState, bool positionOpen, bool buying)
+    public void ProfitMath(GameManager.GS gameState)
     {
         //profit + deposit math
-        if (positionOpen == true && buying == true)
+        if (PositionOpen == true && Buying == true)
         {
             Profit = Rounder.RoundToHundredth((currentPrice - OpenPrice) * Quantity);
             //if (gameState == GameManager.GS.Play) Deposit -= comission;
             //Debug.Log("OP: " + economics.OpenPrice + " | Current Price: " + economics.CurrentPrice + " | Profit: " + economics.profit);
         }
-        else if (positionOpen == true && buying == false)
+        else if (PositionOpen == true && Buying == false)
         {
             Profit = Rounder.RoundToHundredth((OpenPrice - currentPrice) * Quantity);
             //if (gameState == GameManager.GS.Play) Deposit -= comission;

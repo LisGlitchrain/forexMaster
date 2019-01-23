@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class CoinController : MonoBehaviour, IPauseble
+public class CoinController : MonoBehaviour
 {
     public float posYzero;
     public float posY;
@@ -33,12 +33,4 @@ public class CoinController : MonoBehaviour, IPauseble
 				GameManager.instance.GameOver ();
 			} 
 	}
-
-    public void Pause()
-    {
-    }
-
-    public void Resume()
-    {
-    }
 }

@@ -24,11 +24,9 @@ public class GameManager : MonoBehaviour {
     [SerializeField] float experience;          //Накопленный опыт
     [SerializeField] float finalScore;			//Количество очков опыта
 
-    //logic
-    bool positionOpen;
-    bool buying;
-    bool underSupport;
-    bool aboveResistance;
+    ////logic
+    //bool positionOpen;
+    //bool buying;
 
     //Audio
     [SerializeField] AudioClip[] audioClip;
@@ -90,9 +88,9 @@ public class GameManager : MonoBehaviour {
 	{	
 		gameOver = false;
         economics.StartEconomics();
-        SetPrices();
+        SetPricesUI();
         coin.StartCoin(economics.influenceMax);
-        positionOpen = false;
+
 		gameOverPanel.gameObject.SetActive(false);
 		gamePausedPanel.gameObject.SetActive(false);
         timer.StartTimer();
@@ -104,21 +102,22 @@ public class GameManager : MonoBehaviour {
         {
             coin.CoinUpdate(Time.deltaTime, gameSpeed, economics.PriceToDeltaPos);
             economics.UpdateCurrentPrice(Time.deltaTime, Input.touchCount, Input.GetMouseButton(0));
-            economics.ProfitMath(gameState, positionOpen, buying);
+            economics.ProfitMath(gameState);
             economics.Devaluation(Time.deltaTime);
             economics.InfluenceDevaluation(Time.deltaTime);
             if (economics.GetEconomicChanged())
             {
                 OutOfBounds(economics.EcoStatus);
             }
+            //stats
+            if (cycleCounter == 60)
+            {
+                ProgressStorage(1, 0);
+                cycleCounter = 0;
+            }
         }
 
-        //stats
-		if (cycleCounter == 60)
-		{
-			ProgressStorage (1, 0);
-			cycleCounter = 0;
-		}
+
 
         //myUI
         influenceBar.size = economics.influence / economics.influenceMax; //ui
@@ -165,10 +164,7 @@ public class GameManager : MonoBehaviour {
 
 	public void SetQuantity (int setQuantity)
 	{
-			if (positionOpen == false)
-			{
-                economics.SetQuantity(setQuantity);
-			}
+        economics.SetQuantity(setQuantity);
         //ui
 		quantityText.text = economics.Quantity.ToString();
 		SoundManager(3);
@@ -176,79 +172,49 @@ public class GameManager : MonoBehaviour {
 
 	public void OpenBuyPosition ()
 	{
-        buying = true;
-        if (positionOpen == false) 
+        if (economics.OpenBuyPosition()) 
 		{
-            positionOpen = true;
-            PositionManager(true, economics.Quantity); //ui?
-            //ui
             openPositionPricePanel.localPosition = panelY;
             panelBuySellBtns.SetActive(false);
             panelClosePosBtn.SetActive(true);
+
+            openPositionNumText.text = economics.OpenPrice.ToString(); //ui
+            SoundManager(0); //Что? о.о
+            SoundManager(0);
         }
 	}
 
     //ui?
 	public void OpenSellPosition ()
 	{
-        buying = false;
-        if (economics.PositionOpen == false) 
+        if (economics.OpenSellPosition()) 
 		{
-            positionOpen = true;
-            PositionManager(true,  economics.Quantity);
             //ui
             openPositionPricePanel.localPosition = panelY;
 			SoundManager(0);
             panelBuySellBtns.SetActive(false);
             panelClosePosBtn.SetActive(true);
+
+            openPositionNumText.text = economics.OpenPrice.ToString(); //ui
+            SoundManager(0); //Что? о.о
+            SoundManager(0);
         }
 	}
 
     public void ClosePosition()
     {
-        PositionManager(false, 0);
-        positionOpen = false;
-        //ui
-        openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0); //ui
-        if (economics.Profit > 0) SoundManager(1);
-        else SoundManager(2);
-        panelBuySellBtns.SetActive(true);
-        panelClosePosBtn.SetActive(false);
-    }
-    // Здесь что-то страшное происходит Надо пересмотреть метод
-	public void PositionManager (bool open, int quantity)
-	{
-		if ((economics.CurrentPrice * quantity) <= economics.Deposit)
-		{
-            //Переменные == true? Исправить
-			if (open == true)
-			{
-                economics.OpenPrice = economics.CurrentPrice;
-                economics.stock = economics.OpenPrice*quantity;
-                economics.Deposit -=(economics.OpenPrice*quantity); 
-				positionOpen = true; 
-
-				openPositionNumText.text = economics.OpenPrice.ToString(); //ui
-				SoundManager(0); //Что? о.о
-				SoundManager(0);
-			}
-			if (open == false)
-			{
-                economics.OpenPrice = economics.CurrentPrice;
-                economics.Deposit += (economics.Profit+economics.stock);
-				positionOpen = false;
-
-                openPositionNumText.text = economics.OpenPrice.ToString(); //ui
-                ProgressStorage(0, economics.Profit);
-			}
-		}
-		else 
-		{
-			Debug.Log("No money, no honey!");
+        if (economics.ClosePosition())
+        {
             //ui
-			openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0);
-		}
-	}
+            openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0); //ui
+            if (economics.Profit > 0) SoundManager(1);
+            else SoundManager(2);
+            panelBuySellBtns.SetActive(true);
+            panelClosePosBtn.SetActive(false);
+            openPositionNumText.text = economics.OpenPrice.ToString(); //ui
+            ProgressStorage(0, economics.Profit);
+        }
+    }
 
 	public void SoundManager(int clip)
 	{
@@ -257,7 +223,7 @@ public class GameManager : MonoBehaviour {
 	}
 
     //ui
-    public void SetPrices ()
+    public void SetPricesUI ()
     {   
         resistancePriceText.text = economics.ResistancePrice.ToString();
         supportPriceText.text = economics.SupportPrice.ToString();
@@ -285,8 +251,6 @@ public class GameManager : MonoBehaviour {
         gameSpeed = gameSpd;
         gameState = GS.Pause; //не могу проверить паузу, но кажись эта строка должна быть тут. По логике метода PauseButton
         timer.PauseTimer();
-        coin.Pause();
-        economics.Pause();
 	}
 
 	public void ResumeGame()
@@ -294,8 +258,6 @@ public class GameManager : MonoBehaviour {
 		gameSpeed = gameSpeedPause;
 		gameState = GS.Play;
         timer.ResumeTimer();
-        coin.Resume();
-        economics.Resume();
     }
 
     public void RestartGame()
@@ -322,10 +284,10 @@ public class GameManager : MonoBehaviour {
 		SoundManager(5);
 		PauseGame(0);
 		economics.Comission = 0;
-		if (positionOpen == true) economics.Deposit = 0;
+		if (economics.PositionOpen == true) economics.Deposit = 0;
 		economics.Profit = 0;
 		ScoreCounter (overallCycles, topPositionProfit, topSessionProfit);
-		positionOpen = false;
+		economics.PositionOpen = false;
 		// experience += finalScore;
         //ui
 		tPPText.text = topPositionProfit.ToString();
