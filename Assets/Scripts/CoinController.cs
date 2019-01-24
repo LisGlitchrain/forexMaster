@@ -29,8 +29,8 @@ public class CoinController : MonoBehaviour
 	{
 
 		if (coll.gameObject.tag == "ObstacleCol")
-			{
-				GameManager.instance.GameOver ();
-			} 
+		{
+			GameManager.instance.GameOver ();
+		} 
 	}
 }

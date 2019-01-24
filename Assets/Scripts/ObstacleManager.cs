@@ -24,7 +24,7 @@ public class ObstacleManager : MonoBehaviour {
         }
 		if (lastSpawnedCandle.transform.position.x + candleWidth < this.transform.position.x)
 		{
-		    if (GameManager.instance.gameOver == false)
+		    if (GameManager.instance.GameState == GameManager.GS.Play)
 		    {
 				    int probability = Random.Range(0, frequency);
 				    if (probability == 1) Spawn ();

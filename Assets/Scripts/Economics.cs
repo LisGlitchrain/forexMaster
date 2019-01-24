@@ -25,9 +25,8 @@ public class Economics : MonoBehaviour {
     [SerializeField] float currentPriceFallSpeed;
     EcoState newEcoState = EcoState.middle;
     EcoState ecoState = EcoState.middle;
-    public float stock;
+    float stock;
     float newSpread;
-    int newQuantity;
     float pauseInfluenceRiseSpeed;
     float pauseInfluenceFallSpeed;
 
@@ -40,9 +39,49 @@ public class Economics : MonoBehaviour {
     public float PriceToDeltaPos { get { return (currentPrice - initialPrice)*3.5f; } }
     public float SupportPrice { get { return supportPrice; } set { supportPrice = value; } }
     public float ResistancePrice { get { return resistancePrice; } set { resistancePrice = value; } }
-    public float Comission { get { return comission; } set { comission = value; } }
     public EcoState EcoStatus { get { return ecoState; } }
-    public Vector3 PanelY { get; set; }
+
+    public class Status
+    {
+        float deposit;
+        float currentPrice;
+        float supportPrice;
+        float resistancePrice;
+        float profit;
+        float priceToDeltaPos;
+        float influence;
+        float influenceMax;
+        int quantity;
+        float openPrice;
+
+        public float Deposit { get { return deposit; } }
+        public float RndDeposit { get { return Rounder.RoundToHundredth(deposit); } }
+        public float CurrentPrice { get { return currentPrice; } }
+        public float SupportPrice { get { return supportPrice; } }
+        public float ResistancePrice { get { return resistancePrice; } }
+        public float Profit { get { return profit; } }
+        public float Influence { get { return influence; } }
+        public float InfluenceMax { get { return influenceMax; } }
+        public float PriceToDeltaPos { get { return priceToDeltaPos; } }
+        public float Quantity { get { return quantity; } }
+        public float OpenPrice { get { return openPrice; } }
+
+        public Status (float deposit, float currentPrice, float supportPrice, float resistancePrice, float profit, float priceToDeltaPos, float influence, 
+                        float influenceMax, int quantity, float openPrice)
+        {
+            this.deposit = deposit;
+            this.currentPrice = currentPrice;
+            this.supportPrice = supportPrice;
+            this.resistancePrice = resistancePrice;
+            this.profit = profit;
+            this.priceToDeltaPos = priceToDeltaPos;
+            this.influence = influence;
+            this.influenceMax = influenceMax;
+            this.priceToDeltaPos = priceToDeltaPos;
+            this.quantity = quantity;
+            this.openPrice = openPrice;
+        }
+    }
 
     public enum EcoState
     {
@@ -75,18 +114,28 @@ public class Economics : MonoBehaviour {
     //    influenceRiseSpeed = pauseInfluenceRiseSpeed;
     //}
 
-    public void SetQuantity(int setQuantity)
+    public void SetQuantity(bool increase)
     {
         if (!PositionOpen)
         {
-            newQuantity = Quantity + setQuantity; //+=? What?
-            if (newQuantity > 1)
+            if (increase)
             {
-                Quantity = newQuantity;
+                var newQuantity = Quantity + 1; //+=? What?
+                if (newQuantity >= 1)
+                {
+                    Quantity = newQuantity;
+                }
             }
-            else Quantity = 1;
+            else
+            {
+                var newQuantity = Quantity - 1; //+=? What?
+                if (newQuantity >= 1)
+                {
+                    Quantity = newQuantity;
+                }
+            }
         }
-
+        print("Quantity " + Quantity);
     }
 
     public bool OpenBuyPosition()
@@ -207,6 +256,11 @@ public class Economics : MonoBehaviour {
         //float oldDeposit = deposit;
         //Deposit = Mathf.Round(Deposit * 100) / 100;
 
+    }
+
+    public Status GetStatus()
+    {
+        return new Status(RndDeposit,CurrentPrice,SupportPrice,ResistancePrice, Profit,PriceToDeltaPos, RoundInfluence(), influenceMax, Quantity, OpenPrice);
     }
 
 }

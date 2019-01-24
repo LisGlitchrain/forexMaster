@@ -9,18 +9,20 @@ public class GameManager : MonoBehaviour {
     public static GameManager instance = null;
     public bool firstRun;
     public float gameSpeed;             //Общая скорость игры //public
-    public bool gameOver;               //public
     public int cycleCounter;            //Глобальный счётчик длительности игровой сессии //public
     Timer timer;
     float gameSpeedPause;
     GS gameState;
+    public GS GameState { get { return gameState; } }
 
     [SerializeField] CoinController coin;
     [SerializeField] Economics economics;
     [SerializeField] UIManager uiManager;
+    Statistics statistics;
+
     [SerializeField] float topPositionProfit;       //Самый большой доход по сделке
     [SerializeField] float topSessionProfit;        //Самый большой доход за сессию 
-    [SerializeField] float overallCycles;           //Длительность игровой сессии
+    [SerializeField] float time;           //Длительность игровой сессии
     [SerializeField] float experience;          //Накопленный опыт
     [SerializeField] float finalScore;			//Количество очков опыта
 
@@ -33,29 +35,8 @@ public class GameManager : MonoBehaviour {
     AudioSource audioPlayer;
 
     //UI
-    Vector3 panelY;
-    public Scrollbar influenceBar; //public //size, fade
-    [SerializeField] Scrollbar depositBar; //size, fade
-    [SerializeField] Text depositText; //text //можно получать из чайлда, а не напрямую
-    [SerializeField] Text influenceText; //text //можно получать из чайлда, а не напрямую
-    [SerializeField] Text profitText;   //text
-    [SerializeField] Text openPositionNumText;  //text
-    [SerializeField] Text quantityText; //text
-    [SerializeField] Text resistancePriceText;  //text
-    [SerializeField] Text supportPriceText; //text //можно получать из чайлда, а не напрямую
-    [SerializeField] Text currentPriceText; //text //можно получать из чайлда, а не напрямую
-    [SerializeField] RectTransform currentPricePanel;   //yposition, 
-    [SerializeField] RectTransform openPositionPricePanel; //ypos
-    [SerializeField] Scrollbar expBar; //size
-    [SerializeField] RectTransform gameOverPanel; //active
-    [SerializeField] RectTransform gamePausedPanel;  //active
-    [SerializeField] RectTransform mainTutorialPanel; //???
-    [SerializeField] Text tPPText; //text
-    [SerializeField] Text tSPText;  //text
-    [SerializeField] Text sLengthText;  //text
-    [SerializeField] Text expText;  //text
-    [SerializeField] GameObject panelBuySellBtns;
-    [SerializeField] GameObject panelClosePosBtn;
+    [SerializeField] RectTransform mainTutorialPanel; 
+
 
     public enum GS
     {
@@ -70,7 +51,6 @@ public class GameManager : MonoBehaviour {
         timer = GetComponent<Timer>();
         StartGame();
 		audioPlayer = GetComponent<AudioSource>();
-		gameOver = false;
 		PreRun ();        
 	}
 
@@ -80,21 +60,20 @@ public class GameManager : MonoBehaviour {
         {
             mainTutorialPanel.gameObject.SetActive(true);
             mainTutorialPanel.GetComponent<Tutorial>().RunTutorial(0);
-            PauseGame(gameSpeed);
+            gameState = GS.Pause;
         }
 	}
 
 	public void StartGame()
-	{	
-		gameOver = false;
+	{
+        statistics = new Statistics();
+        uiManager.InitializeUI();
         economics.StartEconomics();
-        SetPricesUI();
+        uiManager.SetPricesUI(economics.GetStatus());
         coin.StartCoin(economics.influenceMax);
-
-		gameOverPanel.gameObject.SetActive(false);
-		gamePausedPanel.gameObject.SetActive(false);
         timer.StartTimer();
-	}
+        gameState = GS.Play;
+    }
 
 	void Update() 
 	{
@@ -110,63 +89,39 @@ public class GameManager : MonoBehaviour {
                 OutOfBounds(economics.EcoStatus);
             }
             //stats
-            if (cycleCounter == 60)
-            {
-                ProgressStorage(1, 0);
-                cycleCounter = 0;
-            }
+            statistics.ProgressStorage(timer.RoundedTimeSecs(),0);
+            uiManager.UpdateUI(economics.GetStatus());
         }
-
-
-
-        //myUI
-        influenceBar.size = economics.influence / economics.influenceMax; //ui
-        //ui
-        panelY = Camera.main.WorldToScreenPoint(new Vector3(-7.81f, coin.posY - 3.05f, 0.0f)); //нужна ли здесь panelY? НУЖНА
-        currentPricePanel.localPosition = panelY;
-        economics.PanelY = panelY;
-        depositBar.size = economics.Deposit / 1000 * 5;
-        //ui
-        currentPriceText.text = economics.CurrentPrice.ToString();
-        depositText.text = economics.RndDeposit.ToString(); //depositRnd.ToString();
-        profitText.text = economics.Profit.ToString();
-        //ui
-        if (economics.Profit > 0) profitText.color = new Color(0, 182, 0);
-        else if (economics.Profit < 0) profitText.color = new Color(182, 0, 0);
-        else profitText.color = new Color(240, 240, 240);
-        //ui
-        influenceText.text = economics.RoundInfluence().ToString();
         //ui and sound
-        if (economics.Deposit < 20) { depositText.color = Color.red; SoundManager(4); }
-		else depositText.color = new Color (0.49f, 0.49f, 0.49f);
-        if (economics.Deposit <= 0 && gameOver == false) GameOver();
+        if (economics.Deposit < 20) SoundManager(4);
+        else if (economics.Deposit <= 0 && gameState != GS.Over) GameOver();
     }
 
     //mostlyUI
     public void OutOfBounds (Economics.EcoState ecoState)
 	{
 		if (ecoState == Economics.EcoState.lower)
-		{	
-			depositBar.GetComponent<Image>().CrossFadeColor(Color.red, 0.3f, false, false);
+		{
+            uiManager.DepositGoRed();
 			SoundManager(4);
 		} 
 		else if (ecoState == Economics.EcoState.upper) 
 		{
-            influenceBar.GetComponent<Image>().CrossFadeColor(Color.red, 0.3f, false, false);
-			SoundManager(4);
+            uiManager.InfluenceGoRed();
+            SoundManager(4);
 		}			
         else 
 		{
-            depositBar.GetComponent<Image>().CrossFadeColor(Color.white, 0.3f, false, false);
-            influenceBar.GetComponent<Image>().CrossFadeColor(Color.white, 0.3f, false, false);
-		}
+            uiManager.DepositGoWhite();
+            uiManager.InfluenceGoWhite();
+        }
 	}
 
-	public void SetQuantity (int setQuantity)
+	public void SetQuantity (bool increase)
 	{
-        economics.SetQuantity(setQuantity);
-        //ui
-		quantityText.text = economics.Quantity.ToString();
+        print("Nya");
+        economics.SetQuantity(increase);
+        uiManager.SetQuantity(economics.GetStatus());
 		SoundManager(3);
 	}
 
@@ -174,12 +129,7 @@ public class GameManager : MonoBehaviour {
 	{
         if (economics.OpenBuyPosition()) 
 		{
-            openPositionPricePanel.localPosition = panelY;
-            panelBuySellBtns.SetActive(false);
-            panelClosePosBtn.SetActive(true);
-
-            openPositionNumText.text = economics.OpenPrice.ToString(); //ui
-            SoundManager(0); //Что? о.о
+            uiManager.OpenBuyPosition(economics.GetStatus());
             SoundManager(0);
         }
 	}
@@ -189,14 +139,6 @@ public class GameManager : MonoBehaviour {
 	{
         if (economics.OpenSellPosition()) 
 		{
-            //ui
-            openPositionPricePanel.localPosition = panelY;
-			SoundManager(0);
-            panelBuySellBtns.SetActive(false);
-            panelClosePosBtn.SetActive(true);
-
-            openPositionNumText.text = economics.OpenPrice.ToString(); //ui
-            SoundManager(0); //Что? о.о
             SoundManager(0);
         }
 	}
@@ -205,14 +147,11 @@ public class GameManager : MonoBehaviour {
     {
         if (economics.ClosePosition())
         {
-            //ui
-            openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0); //ui
+
+            statistics.ProgressStorage(0, economics.Profit);
+            uiManager.ClosePosition(economics.GetStatus());
             if (economics.Profit > 0) SoundManager(1);
             else SoundManager(2);
-            panelBuySellBtns.SetActive(true);
-            panelClosePosBtn.SetActive(false);
-            openPositionNumText.text = economics.OpenPrice.ToString(); //ui
-            ProgressStorage(0, economics.Profit);
         }
     }
 
@@ -222,41 +161,28 @@ public class GameManager : MonoBehaviour {
 		audioPlayer.Play();
 	}
 
-    //ui
-    public void SetPricesUI ()
-    {   
-        resistancePriceText.text = economics.ResistancePrice.ToString();
-        supportPriceText.text = economics.SupportPrice.ToString();
-        currentPriceText.text = economics.CurrentPrice.ToString();
-    }
-
 	public void PauseButton()
 	{
 		if (gameState == GS.Play)
 		{
-			PauseGame(0);
-			gameState = GS.Pause;
-			gamePausedPanel.gameObject.SetActive(true);
+            PauseGame();
+            uiManager.UISetPause(true);
 		}
 		else if (gameState == GS.Pause)
 		{
-			ResumeGame();
-			gamePausedPanel.gameObject.SetActive(false);
+            ResumeGame();
+            uiManager.UISetPause(false);
 		}
 	}
 
-	public void PauseGame (float gameSpd) 
+    public void PauseGame()
     {
-        gameSpeedPause = gameSpeed;
-        gameSpeed = gameSpd;
-        gameState = GS.Pause; //не могу проверить паузу, но кажись эта строка должна быть тут. По логике метода PauseButton
+        gameState = GS.Pause;
         timer.PauseTimer();
-	}
-
-	public void ResumeGame()
-	{
-		gameSpeed = gameSpeedPause;
-		gameState = GS.Play;
+    }
+    public void ResumeGame()
+    {
+        gameState = GS.Play;
         timer.ResumeTimer();
     }
 
@@ -265,41 +191,17 @@ public class GameManager : MonoBehaviour {
 		SceneManager.LoadScene (1);
 	}
 
-	void ProgressStorage (float cycles, float tPP)
-	{
-		overallCycles+=cycles;
-		if (tPP > topPositionProfit) topPositionProfit = tPP;
-		topSessionProfit+=tPP;
-	}
-
-	void ScoreCounter (float cycles, float tPP, float tSP)
-	{
-		finalScore = cycles+tPP+tSP;
-	}
-
 	public void GameOver ()
-	{	
-		gameOver = true;
-		gameOverPanel.gameObject.SetActive(true);
-		SoundManager(5);
-		PauseGame(0);
-		economics.Comission = 0;
-		if (economics.PositionOpen == true) economics.Deposit = 0;
-		economics.Profit = 0;
-		ScoreCounter (overallCycles, topPositionProfit, topSessionProfit);
-		economics.PositionOpen = false;
-		// experience += finalScore;
-        //ui
-		tPPText.text = topPositionProfit.ToString();
-		tSPText.text = topSessionProfit.ToString();
-		sLengthText.text = timer.RoundedTimeSecs().ToString(); 
-		expText.text = finalScore.ToString();
-		expBar.size = finalScore/100;
-
+	{
+        gameState = GS.Over;
         timer.PauseTimer();
-        Debug.Log("OVERALL SCORE:  " + finalScore + "  || Cycles: " + overallCycles + "  || Timer: " + timer.RoundedTimeSecs()
+        SoundManager(5);
+        uiManager.GameOverUI(statistics);
+		//economics.PositionOpen = false;
+		// experience += finalScore;
+
+        Debug.Log("OVERALL SCORE:  " + finalScore + "  || Cycles: " + time + "  || Timer: " + timer.RoundedTimeSecs()
             + " || TPP: " + topPositionProfit + " || TSP: " + topSessionProfit + "\n EXPERIENCE: " + experience);
-		gameState = GS.Over;
 	}
 
 	public void MainMenu ()
