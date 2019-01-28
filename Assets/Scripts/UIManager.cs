@@ -59,7 +59,7 @@ public class UIManager : MonoBehaviour {
 
     }
 
-    public void UpdateUI(Economics.Status status)
+    public void UpdateUI(StatusData status)
     {
         influenceBar.size = status.Influence / status.InfluenceMax;
         influenceText.text = status.Influence.ToString();
@@ -107,12 +107,12 @@ public class UIManager : MonoBehaviour {
         BarFadeToColor(influenceBar, Colors.white, fadeSpeed);
     }
 
-    public void SetQuantity(Economics.Status status)
+    public void SetQuantity(StatusData status)
     {
         quantityText.text = status.Quantity.ToString();
     }
 
-    public void OpenBuyPosition(Economics.Status status)
+    public void OpenBuyPosition(StatusData status)
     {
         panelBuySellBtns.SetActive(false);
         panelClosePosBtn.SetActive(true);
@@ -120,7 +120,7 @@ public class UIManager : MonoBehaviour {
         openPositionPricePanel.localPosition = panelY;
     }
 
-    public void OpenSellPosition(Economics.Status status)
+    public void OpenSellPosition(StatusData status)
     {
         openPositionPricePanel.localPosition = panelY;
         panelBuySellBtns.SetActive(false);
@@ -128,14 +128,14 @@ public class UIManager : MonoBehaviour {
         openPositionNumText.text = status.OpenPrice.ToString();
     }
 
-    public void ClosePosition(Economics.Status status)
+    public void ClosePosition(StatusData status)
     {
         openPositionPricePanel.localPosition = new Vector3(-1000.0f, -1000.0f, 0); //ui //Maguc number
         panelBuySellBtns.SetActive(true);
         panelClosePosBtn.SetActive(false);
     }
 
-    public void SetPricesUI(Economics.Status status)
+    public void SetPricesUI(StatusData status)
     {
         resistancePriceText.text = status.ResistancePrice.ToString();
         supportPriceText.text = status.SupportPrice.ToString();

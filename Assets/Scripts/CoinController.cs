@@ -12,11 +12,20 @@ public class CoinController : MonoBehaviour
 
 	}
 
+    /// <summary>
+    /// Initialises coin.
+    /// </summary>
+    /// <param name="influenceMax"></param>
     public void StartCoin(float influenceMax)
     {
         posYzero = transform.position.y;
     }
-
+    /// <summary>
+    /// Update coin position according economics(current price.)
+    /// </summary>
+    /// <param name="deltaTime"></param>
+    /// <param name="gameSpeed"></param>
+    /// <param name="currentPrice">Have to be received drom econommics.</param>
     public void CoinUpdate(float deltaTime, float gameSpeed, float currentPrice)
     {
         rotZ = -100.0f * gameSpeed * deltaTime;

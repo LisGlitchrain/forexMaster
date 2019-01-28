@@ -74,6 +74,7 @@
     <Compile Include="Assets\Scripts\ObstacleManager.cs" />
     <Compile Include="Assets\Scripts\Rounder.cs" />
     <Compile Include="Assets\Scripts\Statistics.cs" />
+    <Compile Include="Assets\Scripts\StatusData.cs" />
     <Compile Include="Assets\Scripts\Switcher.cs" />
     <Compile Include="Assets\Scripts\Timer.cs" />
     <Compile Include="Assets\Scripts\TrendLine.cs" />

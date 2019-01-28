@@ -26,9 +26,6 @@ public class GameManager : MonoBehaviour {
     [SerializeField] float experience;          //Накопленный опыт
     [SerializeField] float finalScore;			//Количество очков опыта
 
-    ////logic
-    //bool positionOpen;
-    //bool buying;
 
     //Audio
     [SerializeField] AudioClip[] audioClip;
@@ -70,7 +67,7 @@ public class GameManager : MonoBehaviour {
         uiManager.InitializeUI();
         economics.StartEconomics();
         uiManager.SetPricesUI(economics.GetStatus());
-        coin.StartCoin(economics.influenceMax);
+        coin.StartCoin(economics.InfluenceMax);
         timer.StartTimer();
         gameState = GS.Play;
     }
@@ -80,10 +77,7 @@ public class GameManager : MonoBehaviour {
         if (gameState == GS.Play)
         {
             coin.CoinUpdate(Time.deltaTime, gameSpeed, economics.PriceToDeltaPos);
-            economics.UpdateCurrentPrice(Time.deltaTime, Input.touchCount, Input.GetMouseButton(0));
-            economics.ProfitMath(gameState);
-            economics.Devaluation(Time.deltaTime);
-            economics.InfluenceDevaluation(Time.deltaTime);
+            economics.Update(Time.deltaTime, Input.touchCount, Input.GetMouseButton(0));
             if (economics.GetEconomicChanged())
             {
                 OutOfBounds(economics.EcoStatus);
@@ -92,7 +86,7 @@ public class GameManager : MonoBehaviour {
             statistics.ProgressStorage(timer.RoundedTimeSecs(),0);
             uiManager.UpdateUI(economics.GetStatus());
         }
-        //ui and sound
+        //sound and logic
         if (economics.Deposit < 20) SoundManager(4);
         else if (economics.Deposit <= 0 && gameState != GS.Over) GameOver();
     }
@@ -119,7 +113,6 @@ public class GameManager : MonoBehaviour {
 
 	public void SetQuantity (bool increase)
 	{
-        print("Nya");
         economics.SetQuantity(increase);
         uiManager.SetQuantity(economics.GetStatus());
 		SoundManager(3);

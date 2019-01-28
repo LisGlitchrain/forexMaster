@@ -4,13 +4,17 @@ using UnityEngine;
 
 public class Economics : MonoBehaviour {
 
-    public float influenceMax;                  //Максимальное количество очков влияния //public
-    public float influenceRiseSpeed;            //Скорость восстановления очков влияния //public
-    public float influenceFallSpeed;            //Скорость растраты очков влияния       //public
-    public float influence;                     //Текущее количество очков влияния //public
+    [SerializeField] float influenceMax;                  //Максимальное количество очков влияния //public
+    [SerializeField] float influenceRiseSpeed;            //Скорость восстановления очков влияния //public
+    [SerializeField] float influenceFallSpeed;            //Скорость растраты очков влияния       //public
+    [SerializeField] float influence;                     //Текущее количество очков влияния //public
     public int Quantity { get; set; }				//Количество товара торгуемого инстумента
-    public float OpenPrice { get; set; }           //Цена открытия позиции (начала сделки)
+    float OpenPrice { get; set; }           //Цена открытия позиции (начала сделки)
+    /// <summary>
+    /// Current profit.
+    /// </summary>
     public float Profit { get ; set; }              //Доход от сделки
+
 
     [SerializeField] float initialPrice;        //Начальная для игровой сессии цена инструмента (тут и далее: инструмент это пара товаров (Евро/Доллар, например))
     [SerializeField] float currentPrice;        //Текущая цена инструмента
@@ -19,70 +23,38 @@ public class Economics : MonoBehaviour {
     [SerializeField] float closePrice;          //Цена закрытия позиции (конца сделки)
     [SerializeField] float spread;              //Коэффициент разницы цен между ценой сопротивления и поддержки
     [SerializeField] float devaluation;         //Коэффициент обесценивания инструмента при падении ниже линии поддержки
-    [SerializeField] float influenceDevaluation;
+    [SerializeField] float influenceDevaluation; //эт я сам не знаю, что такое 
     [SerializeField] float comission;           //Размер комиссии, отчисляемой брокеру при открытии позиции
     [SerializeField] float currentPriceRiseSpeed;
     [SerializeField] float currentPriceFallSpeed;
-    EcoState newEcoState = EcoState.middle;
-    EcoState ecoState = EcoState.middle;
+    EcoState newEcoState;
+    EcoState ecoState;
     float stock;
     float newSpread;
-    float pauseInfluenceRiseSpeed;
-    float pauseInfluenceFallSpeed;
-
-    public bool PositionOpen { get; set; }
-    public bool PositionClose { get; set; }
-    public bool Buying { get; set; }
+    bool PositionOpen { get; set; }
+    bool Buying { get; set; }
+    /// <summary>
+    /// Current player's deposit.
+    /// </summary>
     public float Deposit { get; set; }
-    public float RndDeposit { get { return Rounder.RoundToHundredth(Deposit); } }
-    public float CurrentPrice { get { return currentPrice; } set { currentPrice = value; } }
+    float RndDeposit { get { return Rounder.RoundToHundredth(Deposit); } }
+    float RoundInfluence { get { return Rounder.RoundToHundredth(influence); } }
+    public float InfluenceMax { get { return influenceMax; } }
+    float CurrentPrice { get { return currentPrice; } set { currentPrice = value; } }
+    /// <summary>
+    /// Translation of current price to coin's delta position
+    /// </summary>
     public float PriceToDeltaPos { get { return (currentPrice - initialPrice)*3.5f; } }
-    public float SupportPrice { get { return supportPrice; } set { supportPrice = value; } }
-    public float ResistancePrice { get { return resistancePrice; } set { resistancePrice = value; } }
+    float SupportPrice { get { return supportPrice; } set { supportPrice = value; } }
+    float ResistancePrice { get { return resistancePrice; } set { resistancePrice = value; } }
+    /// <summary>
+    /// Contain information if current price above, below or between support/resistance prices.
+    /// </summary>
     public EcoState EcoStatus { get { return ecoState; } }
 
-    public class Status
-    {
-        float deposit;
-        float currentPrice;
-        float supportPrice;
-        float resistancePrice;
-        float profit;
-        float priceToDeltaPos;
-        float influence;
-        float influenceMax;
-        int quantity;
-        float openPrice;
-
-        public float Deposit { get { return deposit; } }
-        public float RndDeposit { get { return Rounder.RoundToHundredth(deposit); } }
-        public float CurrentPrice { get { return currentPrice; } }
-        public float SupportPrice { get { return supportPrice; } }
-        public float ResistancePrice { get { return resistancePrice; } }
-        public float Profit { get { return profit; } }
-        public float Influence { get { return influence; } }
-        public float InfluenceMax { get { return influenceMax; } }
-        public float PriceToDeltaPos { get { return priceToDeltaPos; } }
-        public float Quantity { get { return quantity; } }
-        public float OpenPrice { get { return openPrice; } }
-
-        public Status (float deposit, float currentPrice, float supportPrice, float resistancePrice, float profit, float priceToDeltaPos, float influence, 
-                        float influenceMax, int quantity, float openPrice)
-        {
-            this.deposit = deposit;
-            this.currentPrice = currentPrice;
-            this.supportPrice = supportPrice;
-            this.resistancePrice = resistancePrice;
-            this.profit = profit;
-            this.priceToDeltaPos = priceToDeltaPos;
-            this.influence = influence;
-            this.influenceMax = influenceMax;
-            this.priceToDeltaPos = priceToDeltaPos;
-            this.quantity = quantity;
-            this.openPrice = openPrice;
-        }
-    }
-
+    /// <summary>
+    /// Contains 3 states describing current price's pisition relative to suppors/resistance prices.
+    /// </summary>
     public enum EcoState
     {
         upper,
@@ -90,6 +62,9 @@ public class Economics : MonoBehaviour {
         lower
     }
 
+    /// <summary>
+    /// Initialize economics with initial params.
+    /// </summary>
     public void StartEconomics()
     {
         SetPrices();
@@ -98,22 +73,14 @@ public class Economics : MonoBehaviour {
         Quantity = 1;
         Deposit = 200f;
         PositionOpen = false;
+        newEcoState = EcoState.middle;
+        ecoState = EcoState.middle;
     }
 
-    //public void Pause()
-    //{
-    //    pauseInfluenceRiseSpeed = influenceRiseSpeed;
-    //    pauseInfluenceFallSpeed = influenceFallSpeed;
-    //    influenceRiseSpeed = 0f;
-    //    influenceFallSpeed = 0f;
-    //}
-
-    //public void Resume()
-    //{
-    //    influenceFallSpeed = pauseInfluenceFallSpeed;
-    //    influenceRiseSpeed = pauseInfluenceRiseSpeed;
-    //}
-
+    /// <summary>
+    /// Increases/decreases Quantity. Validation included.
+    /// </summary>
+    /// <param name="increase">True increases quantity by one, false decreases.</param>
     public void SetQuantity(bool increase)
     {
         if (!PositionOpen)
@@ -152,7 +119,7 @@ public class Economics : MonoBehaviour {
         else return false;
     }
 
-    //ui?
+    
     public bool OpenSellPosition()
     {
         Buying = false;
@@ -167,11 +134,15 @@ public class Economics : MonoBehaviour {
         else return false;
     }
 
+    /// <summary>
+    /// Closes any open position. Calculates and changes Deposit. Returns true if position is closed successfully; false if not.
+    /// </summary>
+    /// <returns>True is position is closed successfully.</returns>
     public bool ClosePosition()
     {
         if (PositionOpen)
         {
-            OpenPrice = CurrentPrice;
+            //OpenPrice = CurrentPrice;
             Deposit += (Profit + stock);
             PositionOpen = false;
             return true;
@@ -179,35 +150,52 @@ public class Economics : MonoBehaviour {
         else return false;
 
     }
-
-    public void SetPrices()
+    /// <summary>
+    /// Initializes prices.
+    /// </summary>
+    void SetPrices()
     {
         initialPrice = Rounder.RoundToHundredth(initialPrice);
         resistancePrice = Rounder.RoundToHundredth(initialPrice * spread);
         supportPrice = Rounder.RoundToHundredth(initialPrice / spread);
         newSpread = resistancePrice - supportPrice;
     }
-
+    /// <summary>
+    /// Devaluates deposit according time and initialized devaluation value.
+    /// </summary>
+    /// <param name="deltaTime">Delta time</param>
     public void Devaluation(float deltaTime)
     {
         if (ecoState == EcoState.lower)
             Deposit -= devaluation * deltaTime;
     }
-
+    /// <summary>
+    /// Devaluates currency influence according time and initialized devaluation value.
+    /// </summary>
+    /// <param name="deltaTime">Delta time</param>
     public void InfluenceDevaluation(float deltaTime)
     {
         if (ecoState == EcoState.upper)
             influence -= influenceDevaluation * deltaTime;
     }
 
-    public float RoundInfluence()
+    /// <summary>
+    /// Updates economics variables according time and player's actions.
+    /// </summary>
+    /// <param name="deltatime"></param>
+    /// <param name="touchCount"></param>
+    /// <param name="lmbPressed"></param>
+    public void Update(float deltatime, int touchCount, bool lmbPressed)
     {
-        return Rounder.RoundToHundredth(influence);
+        UpdateCurrentPrice(deltatime, touchCount, lmbPressed);
+        ProfitMath();
+        Devaluation(Time.deltaTime);
+        InfluenceDevaluation(Time.deltaTime);
     }
 
-    public void UpdateCurrentPrice(float deltatime, int touchCount, bool lmbPressed)
+
+    void UpdateCurrentPrice(float deltatime, int touchCount, bool lmbPressed)
     {
-        //АААААА!!!11111 coin.posY Здесь использовать нельзя ! обратная зависимость
         if ((touchCount > 0 || lmbPressed) && currentPrice < resistancePrice+ 0.3) //Нужно подниматься чуть выше границы
         {
             currentPrice = Rounder.RoundToHundredth(currentPrice + currentPriceRiseSpeed * deltatime); //coin.posY * (1 / newSpread)=
@@ -218,6 +206,10 @@ public class Economics : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Returns true if economics state is changed. (Current price crosses support/resistance prices.)
+    /// </summary>
+    /// <returns></returns>
     public bool GetEconomicChanged()
     {
         if (currentPrice> resistancePrice)
@@ -237,7 +229,7 @@ public class Economics : MonoBehaviour {
         }
     }
 
-    public void ProfitMath(GameManager.GS gameState)
+    void ProfitMath()
     {
         //profit + deposit math
         if (PositionOpen == true && Buying == true)
@@ -258,9 +250,13 @@ public class Economics : MonoBehaviour {
 
     }
 
-    public Status GetStatus()
+    /// <summary>
+    /// Returns data-class with info for UI.
+    /// </summary>
+    /// <returns></returns>
+    public StatusData GetStatus()
     {
-        return new Status(RndDeposit,CurrentPrice,SupportPrice,ResistancePrice, Profit,PriceToDeltaPos, RoundInfluence(), influenceMax, Quantity, OpenPrice);
+        return new StatusData(RndDeposit,CurrentPrice,SupportPrice,ResistancePrice, Profit,PriceToDeltaPos, RoundInfluence, influenceMax, Quantity, OpenPrice);
     }
 
 }
