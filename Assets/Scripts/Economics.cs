@@ -27,6 +27,8 @@ public class Economics : MonoBehaviour {
     [SerializeField] float comission;           //Размер комиссии, отчисляемой брокеру при открытии позиции
     [SerializeField] float currentPriceRiseSpeed;
     [SerializeField] float currentPriceFallSpeed;
+
+    [SerializeField] float influenceDecaluationDivider;
     EcoState newEcoState;
     EcoState ecoState;
     float stock;
@@ -102,7 +104,6 @@ public class Economics : MonoBehaviour {
                 }
             }
         }
-        print("Quantity " + Quantity);
     }
 
     public bool OpenBuyPosition()
@@ -177,6 +178,8 @@ public class Economics : MonoBehaviour {
     {
         if (ecoState == EcoState.upper)
             influence -= influenceDevaluation * deltaTime;
+        else if (influence < influenceMax)
+            influence += influenceDevaluation * deltaTime / influenceDecaluationDivider;
     }
 
     /// <summary>
@@ -185,7 +188,7 @@ public class Economics : MonoBehaviour {
     /// <param name="deltatime"></param>
     /// <param name="touchCount"></param>
     /// <param name="lmbPressed"></param>
-    public void Update(float deltatime, int touchCount, bool lmbPressed)
+    public void EcoUpdate(float deltatime, int touchCount, bool lmbPressed)
     {
         UpdateCurrentPrice(deltatime, touchCount, lmbPressed);
         ProfitMath();

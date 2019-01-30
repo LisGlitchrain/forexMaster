@@ -1,10 +1,14 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 public class ObstacleManager : MonoBehaviour {
 
-    [SerializeField] GameObject candleCollider;
+    [SerializeField] GameObject obstacleToSpawn;
 	[SerializeField] int frequency;
+    [SerializeField] float obstacleSpeed;
+    [SerializeField] float deleteXcoord;
+
+    List<GameObject> obstacles;
 
     GameObject lastSpawnedCandle;
     float candleHeight;
@@ -12,11 +16,44 @@ public class ObstacleManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		candleWidth = candleCollider.GetComponent<BoxCollider2D>().size.x;
+		candleWidth = obstacleToSpawn.GetComponent<BoxCollider2D>().size.x;
+        obstacles = new List<GameObject>();
 	}
 	
-	// Update is called once per frame
-	void Update () {
+	public void UpdateIt(float deltaTime)
+    {
+        ObstacleSpawn();
+        MoveObstacles(obstacles, deltaTime);
+        DeleteObstacles(obstacles, deleteXcoord);
+    }
+
+
+    void MoveObstacles(List<GameObject> obstacles, float deltaTime)
+    {
+        for (var i =0; i< obstacles.Count; i++)
+        {
+            obstacles[i].transform.position = new Vector3(obstacles[i].transform.position.x - obstacleSpeed * deltaTime, 
+                                                          obstacles[i].transform.position.y, 
+                                                          obstacles[i].transform.position.z);
+        }
+    }
+
+    void DeleteObstacles(List<GameObject> obstacles, float deleteXcoord)
+    {
+        for (var i = 0; i < obstacles.Count; i++)
+        {
+            if (obstacles[i].transform.position.x < deleteXcoord)
+            {
+                DestroyImmediate(obstacles[i]);
+                obstacles.RemoveAt(i);
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Smart spawn.
+    /// </summary>
+	void ObstacleSpawn () {
         if (lastSpawnedCandle == null)
         {
             lastSpawnedCandle = new GameObject();
@@ -24,18 +61,16 @@ public class ObstacleManager : MonoBehaviour {
         }
 		if (lastSpawnedCandle.transform.position.x + candleWidth < this.transform.position.x)
 		{
-		    if (GameManager.instance.GameState == GameManager.GS.Play)
-		    {
-				    int probability = Random.Range(0, frequency);
-				    if (probability == 1) Spawn ();
-		    }
+			int probability = Random.Range(0, frequency);
+			if (probability == 1) Spawn (obstacles);
 		}
 	}
 
-	void Spawn () 
+	void Spawn (List<GameObject> obstacles) 
 	{
 		//Debug.Log("SPAWN!");
 		transform.position = new Vector3 (transform.position.x, Random.Range(3.0f,1.0f), 0);
-		lastSpawnedCandle = Instantiate (candleCollider, transform.position, transform.rotation);
+		lastSpawnedCandle = Instantiate (obstacleToSpawn, transform.position, transform.rotation);
+        obstacles.Add(lastSpawnedCandle);
     }
 }

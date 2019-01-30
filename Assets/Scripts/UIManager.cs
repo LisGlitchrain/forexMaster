@@ -47,7 +47,8 @@ public class UIManager : MonoBehaviour {
         depositText = depositBar.GetComponentInChildren<Text>();
         influenceText = influenceBar.GetComponentInChildren<Text>();
         gameOverPanel.gameObject.SetActive(false); 
-        gamePausedPanel.gameObject.SetActive(false); 
+        gamePausedPanel.gameObject.SetActive(false);
+        panelBuySellBtns.SetActive(true);
     }
     // Use this for initialization
     void Start() {
@@ -77,9 +78,13 @@ public class UIManager : MonoBehaviour {
         else depositText.color = Colors.gray;
     }
 
-    void FinishStats()
+    void FinishStats(Statistics stats)
     {
-
+        tPPText.text = stats.TopPositionProfit.ToString();
+        tSPText.text = stats.TopSessionProfit.ToString();
+        sLengthText.text = stats.Time.ToString();
+        expText.text = stats.ScoreCounter().ToString();
+        expBar.size = stats.ScoreCounter() / 100;
     }
 
     void BarFadeToColor(Scrollbar bar, Color color, float fadingSpeed)
@@ -150,13 +155,10 @@ public class UIManager : MonoBehaviour {
 
     public void GameOverUI(Statistics stats)
     {
+        panelBuySellBtns.SetActive(false);
+        panelClosePosBtn.SetActive(false);
         gameOverPanel.gameObject.SetActive(true);
-        //ui
-        tPPText.text = stats.TopPositionProfit.ToString();
-        tSPText.text = stats.TopSessionProfit.ToString();
-        sLengthText.text = stats.Time.ToString();
-        expText.text = stats.ScoreCounter().ToString();
-        expBar.size = stats.ScoreCounter() / 100;
+        FinishStats(stats);
     }
 
 }

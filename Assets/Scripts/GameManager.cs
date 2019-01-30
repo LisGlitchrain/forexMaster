@@ -14,11 +14,15 @@ public class GameManager : MonoBehaviour {
     float gameSpeedPause;
     GS gameState;
     public GS GameState { get { return gameState; } }
+    float currentDeltaTime;
 
     [SerializeField] CoinController coin;
     [SerializeField] Economics economics;
     [SerializeField] UIManager uiManager;
     Statistics statistics;
+    [SerializeField] Background background;
+    [SerializeField] ObstacleManager obstacleManager;
+    [SerializeField] TrendLine trendLine;
 
     [SerializeField] float topPositionProfit;       //Самый большой доход по сделке
     [SerializeField] float topSessionProfit;        //Самый большой доход за сессию 
@@ -74,10 +78,11 @@ public class GameManager : MonoBehaviour {
 
 	void Update() 
 	{
+        currentDeltaTime = Time.deltaTime;
         if (gameState == GS.Play)
         {
-            coin.CoinUpdate(Time.deltaTime, gameSpeed, economics.PriceToDeltaPos);
-            economics.Update(Time.deltaTime, Input.touchCount, Input.GetMouseButton(0));
+            coin.CoinUpdate(currentDeltaTime, gameSpeed, economics.PriceToDeltaPos);
+            economics.EcoUpdate(currentDeltaTime, Input.touchCount, Input.GetMouseButton(0));
             if (economics.GetEconomicChanged())
             {
                 OutOfBounds(economics.EcoStatus);
@@ -85,7 +90,10 @@ public class GameManager : MonoBehaviour {
             //stats
             statistics.ProgressStorage(timer.RoundedTimeSecs(),0);
             uiManager.UpdateUI(economics.GetStatus());
+            background.BackgroundUpdate(currentDeltaTime);
+            obstacleManager.UpdateIt(currentDeltaTime);
         }
+        trendLine.UpdateLine(coin);
         //sound and logic
         if (economics.Deposit < 20) SoundManager(4);
         else if (economics.Deposit <= 0 && gameState != GS.Over) GameOver();
@@ -132,6 +140,7 @@ public class GameManager : MonoBehaviour {
 	{
         if (economics.OpenSellPosition()) 
 		{
+            uiManager.OpenSellPosition(economics.GetStatus());
             SoundManager(0);
         }
 	}
@@ -172,11 +181,13 @@ public class GameManager : MonoBehaviour {
     {
         gameState = GS.Pause;
         timer.PauseTimer();
+        trendLine.Pause();
     }
     public void ResumeGame()
     {
         gameState = GS.Play;
         timer.ResumeTimer();
+        trendLine.Resume();
     }
 
     public void RestartGame()
