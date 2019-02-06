@@ -89,6 +89,7 @@ public class GameManager : MonoBehaviour {
             }
             //stats
             statistics.ProgressStorage(timer.RoundedTimeSecs(),0);
+
             uiManager.UpdateUI(economics.GetStatus());
             background.BackgroundUpdate(currentDeltaTime);
             obstacleManager.UpdateIt(currentDeltaTime);

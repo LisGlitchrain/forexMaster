@@ -167,16 +167,16 @@ public class Economics : MonoBehaviour {
     /// <param name="deltaTime">Delta time</param>
     public void Devaluation(float deltaTime)
     {
-        if (ecoState == EcoState.lower)
+        if (ecoState == EcoState.lower || ecoState == EcoState.upper)
             Deposit -= devaluation * deltaTime;
     }
     /// <summary>
     /// Devaluates currency influence according time and initialized devaluation value.
     /// </summary>
     /// <param name="deltaTime">Delta time</param>
-    public void InfluenceDevaluation(float deltaTime)
+    void InfluenceDevaluation(float deltaTime, int touchCount, bool lmbPressed)
     {
-        if (ecoState == EcoState.upper)
+        if ((touchCount > 0 || lmbPressed) &&influence>0)
             influence -= influenceDevaluation * deltaTime;
         else if (influence < influenceMax)
             influence += influenceDevaluation * deltaTime / influenceDecaluationDivider;
@@ -185,21 +185,21 @@ public class Economics : MonoBehaviour {
     /// <summary>
     /// Updates economics variables according time and player's actions.
     /// </summary>
-    /// <param name="deltatime"></param>
-    /// <param name="touchCount"></param>
-    /// <param name="lmbPressed"></param>
+    /// <param name="deltatime">delta time</param>
+    /// <param name="touchCount">Counts of touches</param>
+    /// <param name="lmbPressed">Is left mouse button pressed?</param>
     public void EcoUpdate(float deltatime, int touchCount, bool lmbPressed)
     {
         UpdateCurrentPrice(deltatime, touchCount, lmbPressed);
         ProfitMath();
         Devaluation(Time.deltaTime);
-        InfluenceDevaluation(Time.deltaTime);
+        InfluenceDevaluation(Time.deltaTime,touchCount, lmbPressed);
     }
 
 
     void UpdateCurrentPrice(float deltatime, int touchCount, bool lmbPressed)
     {
-        if ((touchCount > 0 || lmbPressed) && currentPrice < resistancePrice+ 0.3) //Нужно подниматься чуть выше границы
+        if ((touchCount > 0 || lmbPressed) && currentPrice < resistancePrice+ 0.3 && influence>0) //Нужно подниматься чуть выше границы
         {
             currentPrice = Rounder.RoundToHundredth(currentPrice + currentPriceRiseSpeed * deltatime); //coin.posY * (1 / newSpread)=
         }
