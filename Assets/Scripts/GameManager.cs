@@ -16,6 +16,8 @@ public class GameManager : MonoBehaviour {
     public GS GameState { get { return gameState; } }
     float currentDeltaTime;
 
+    PlayerData playerData;
+
     [SerializeField] CoinController coin;
     [SerializeField] Economics economics;
     [SerializeField] UIManager uiManager;
@@ -62,14 +64,21 @@ public class GameManager : MonoBehaviour {
             mainTutorialPanel.gameObject.SetActive(true);
             mainTutorialPanel.GetComponent<Tutorial>().RunTutorial(0);
             gameState = GS.Pause;
+
+            playerData = new PlayerData();
+            playerData.deposit = 200f;
+            playerData.quantity = 1;
+            PlayerDataSaverLoader.SavePlayerData(playerData);
         }
 	}
 
 	public void StartGame()
 	{
+        playerData = PlayerDataSaverLoader.LoadPlayerData();
         statistics = new Statistics();
         uiManager.InitializeUI();
-        economics.StartEconomics();
+        economics.StartEconomics(playerData);
+        uiManager.SetQuantity(economics.GetStatus());
         uiManager.SetPricesUI(economics.GetStatus());
         coin.StartCoin(economics.InfluenceMax);
         timer.StartTimer();
@@ -89,7 +98,6 @@ public class GameManager : MonoBehaviour {
             }
             //stats
             statistics.ProgressStorage(timer.RoundedTimeSecs(),0);
-
             uiManager.UpdateUI(economics.GetStatus());
             background.BackgroundUpdate(currentDeltaTime);
             obstacleManager.UpdateIt(currentDeltaTime);
@@ -207,6 +215,7 @@ public class GameManager : MonoBehaviour {
 
         Debug.Log("OVERALL SCORE:  " + finalScore + "  || Cycles: " + time + "  || Timer: " + timer.RoundedTimeSecs()
             + " || TPP: " + topPositionProfit + " || TSP: " + topSessionProfit + "\n EXPERIENCE: " + experience);
+        PlayerDataSaverLoader.SavePlayerData(economics.GetPlayerData());
 	}
 
 	public void MainMenu ()

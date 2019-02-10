@@ -67,13 +67,13 @@ public class Economics : MonoBehaviour {
     /// <summary>
     /// Initialize economics with initial params.
     /// </summary>
-    public void StartEconomics()
+    public void StartEconomics(PlayerData playerData)
     {
         SetPrices();
         currentPrice = initialPrice;
         influence = 2f;
-        Quantity = 1;
-        Deposit = 200f;
+        Quantity = playerData.quantity;
+        Deposit = playerData.deposit;
         PositionOpen = false;
         newEcoState = EcoState.middle;
         ecoState = EcoState.middle;
@@ -262,4 +262,11 @@ public class Economics : MonoBehaviour {
         return new StatusData(RndDeposit,CurrentPrice,SupportPrice,ResistancePrice, Profit,PriceToDeltaPos, RoundInfluence, influenceMax, Quantity, OpenPrice);
     }
 
+    public PlayerData GetPlayerData()
+    {
+        PlayerData playerData = new PlayerData();
+        playerData.deposit = Deposit;
+        playerData.quantity = Quantity;
+        return playerData;
+    }
 }
